@@ -1,6 +1,7 @@
 #ifndef PIECE_H
 #define PIECE_H
 #include <iostream>
+#include <vector>
 #include "board.h"
 
 enum class Colour {White, Black, None};
@@ -10,8 +11,8 @@ class Position {
     int row;
     int col;
     public:
-        Position& operator=(const Position& other);
-}
+        bool operator==(const Position& other);
+};
 
 class Piece {
     int value;
@@ -20,13 +21,14 @@ class Piece {
     Position pos;
 
     public:
+        virtual ~Piece() {}
         Piece(int value, PieceType type, Colour colour, Position pos);
         Colour getColour();
         Position getPosition();
-        void setPosition();
+        void setPosition(Position p);
         char getSymbol();
-        std::vector<Position> getValidMoves();
+        virtual std::vector<Position> getValidMoves() = 0; //abstract method
 
-}
+};
 
 #endif
