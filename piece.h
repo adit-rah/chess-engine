@@ -27,6 +27,9 @@ class Piece {
         Position getPosition();
         void setPosition(Position p);
         char getSymbol();
+        PieceType getType() { return type; }
+        Piece* createPiece(int row, int col);
+        virtual std::vector<Position> getRawMoves() = 0; //abstract method
         virtual std::vector<Position> getValidMoves() = 0; //abstract method
 
 };

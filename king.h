@@ -4,7 +4,8 @@
 class King : public Piece {
     
     public:
-    King( Piece Pawn);
+    King( Piece& Pawn);
+    std::vector<Position> getRawMoves()
 }
 
 #endif
