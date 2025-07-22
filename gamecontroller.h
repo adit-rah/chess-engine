@@ -13,6 +13,12 @@ class GameController {
     Colour turn;                    // Whose turn is it? White/Black
     std::vector<Display*> displays; // Attached displays (Text/Graphical)
     bool isGameRunning = false;
+    bool inSetupMode = false;
+    void handleSetupCommand(const std::string &action, std::istringstream &iss);    // done for 
+    void handleNormalCommand(const std::string &action, std::istringstream &iss);   // clarity sake
+    void cmdGame(std::istringstream &iss);
+    void cmdMove(std::istringstream &iss);
+    void cmdResign();
 
 public:
     GameController();

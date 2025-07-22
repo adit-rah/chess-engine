@@ -12,20 +12,47 @@ public:
     Board();
     ~Board();
     
-    // board set up functions
+    // You will notice that some methods that should be const aren't. The reason why
+    // this is the case is because we do some fast pin detection that alters the 
+    // state of the board, making it not const.
+    
+    // board set up functions =========
+    
+    // sets pieces in the default way
     void setPieces();
+    // resets all the pieces to default positions
     void resetBoard();
 
-    // move validation
+    // move validation =================
+    
+    // returns the piece at that position
     Piece* getPieceAt(Position p) const;
+    // checks if a move is "board legal" (ie. it conforms to the rules of the board) 
+    // for the default board this includes: if a move exposes the king
     bool validMove(Position frome, Position to); 
+    // moves the piece, returns false if invalid move
     bool movePiece(Position from, Position to); 
+    // checks if a piece can move 
     bool canMove(Piece& p);
 
-    // attacking logic and handling
+    // placement validation ============
+    
+    // places a piece based of the symbol at that position 
+    void placePiece(char pieceSymbol, Position pos);
+    // removes the piece at that position
+    void removePiece(Position pos);
+    // validates setup in accordance to setup mode requirements
+    bool validateSetup() const; 
+
+    // attacking logic and handling ====
+    
+    // returns all squares being attacked by the colour c
     std::vector<Position> squaresBeingAttackedBy(Colour c) const;
+    // is the king in the line of sight of any enemy piece?
     bool isInCheck(Colour c) const;
+    // are there any moves left?
     bool isCheckMate(Colour c);
+    // finds the kings position on the board
     Position findKing(Colour c) const;
 };
 
