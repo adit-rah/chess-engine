@@ -3,10 +3,11 @@
 
 
 Rook::Rook(Colour colour, Position pos)
-    : Piece(5, PieceType::Rook, colour, pos) {} // value=5 for rook
+    : Piece(5, PieceType::Rook, colour, pos) {} // value = 5 for rook
 
 
 // still does not check for king safety and other such rules
+// but it prunes for blocked paths for effeciencies sake
 std::vector<Position> Rook::getRawMoves(const Board &b) {
     std::vector<Position> moves;
     Position current = getPosition();
@@ -22,15 +23,16 @@ std::vector<Position> Rook::getRawMoves(const Board &b) {
 
         // Move along this direction until blocked
         while (r >= 0 && r < 8 && c >= 0 && c < 8) {
-            Piece *target = b.getPieceAt(Position(r, c));
+            Position nextPos(r, c);
+            Piece *target = b.getPieceAt(nextPos);
 
             if (!target || target->getType() == PieceType::None) {
                 // Empty square --> valid move
-                moves.push_back(Position(r, c));
+                moves.push_back(nextPos);
             } else {
                 // Occupied square --> can capture if enemy
                 if (target->getColour() != myColour) {
-                    moves.push_back(Position(r, c));
+                    moves.push_back(nextPos);
                 }
                 // Stop exploring this direction (blocked)
                 break;
