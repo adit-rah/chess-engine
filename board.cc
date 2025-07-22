@@ -9,7 +9,7 @@
 #include "king.h"
 
 
-// Constructor/Destructor
+// Constructor/Destructor 
 Board::Board() {
     pieces = new Piece**[8];
     for (int i = 0; i < 8; ++i) {
@@ -28,8 +28,9 @@ Board::~Board() {
 }
 
 
-// Board Handling methods
-void Board::setPieces() {               // default chess board
+// Board Handling methods (see .h for documentation)
+
+void Board::setPieces() {       // default chess board
     // === WHITE PIECES ===
     // Pawns
     for (int c = 0; c < 8; ++c) {
@@ -74,7 +75,8 @@ void Board::resetBoard() {
 }
 
 
-// Move Validation methods
+// Move Validation methods (see .h for documentation)
+
 Piece* Board::getPieceAt(Position p) const {
     if (p.row < 0 || p.row >= 8 || p.col < 0 || p.col >= 8) {
         return nullptr; 
@@ -82,8 +84,7 @@ Piece* Board::getPieceAt(Position p) const {
     return pieces[p.row][p.col];
 }
 
-// checks if a move is "board legal" (ie. it conforms to the rules of the board) 
-// for the default board this includes: if a move exposes the king
+
 bool Board::validMove(Position from, Position to) { // this won't be const for speed
     Piece* movingPiece = getPieceAt(from);
     if (!movingPiece) return false;
@@ -132,7 +133,76 @@ bool Board::canMove(Piece& p) {
     return !validMoves.empty();
 }
 
-// squares being attacked by c
+
+// Placement Validation methods (see .h for documentation)
+
+void Board::placePiece(char pieceSymbol, Position pos) {
+    // Delete whatever is currently there
+    if (pieces[pos.row][pos.col]) {
+        delete pieces[pos.row][pos.col];
+    }
+
+    Colour colour = isupper(pieceSymbol) ? Colour::White : Colour::Black;
+    char lower = tolower(pieceSymbol);
+
+    Piece* newPiece = nullptr;
+    switch (lower) {
+        case 'k': newPiece = new King(colour, pos); break;
+        case 'q': newPiece = new Queen(colour, pos); break;
+        case 'r': newPiece = new Rook(colour, pos); break;
+        case 'b': newPiece = new Bishop(colour, pos); break;
+        case 'n': newPiece = new Knight(colour, pos); break;
+        case 'p': newPiece = new Pawn(colour, pos); break;
+        default: newPiece = new EmptyPiece(pos); break; 
+    }
+
+    pieces[pos.row][pos.col] = newPiece;
+}
+
+
+void Board::removePiece(Position pos) {
+    if (pieces[pos.row][pos.col]) {
+        delete pieces[pos.row][pos.col];
+    }
+    pieces[pos.row][pos.col] = new EmptyPiece(pos);
+}
+
+
+bool Board::validateSetup() const {
+    int whiteKingCount = 0;
+    int blackKingCount = 0;
+
+    for (int r = 0; r < 8; r++) {
+        for (int c = 0; c < 8; c++) {
+            Piece* p = pieces[r][c];
+            if (!p) continue;
+
+            if (p->getType() == PieceType::King) {
+                if (p->getColour() == Colour::White) whiteKingCount++;
+                else if (p->getColour() == Colour::Black) blackKingCount++;
+            }
+
+            if (p->getType() == PieceType::Pawn && (r == 0 || r == 7)) {
+                return false;
+            }
+        }
+    }
+
+    if (whiteKingCount != 1 || blackKingCount != 1) {
+        return false;
+    }
+
+    // Cannot start with either king in check
+    if (isInCheck(Colour::White) || isInCheck(Colour::Black)) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// Attacking Logic and Handling methods (see .h for documentation)
+
 std::vector<Position> Board::squaresBeingAttackedBy(Colour c) const {
     std::vector<Position> attackedSquares;
     for (int i = 0; i < 8; ++i) {
