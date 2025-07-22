@@ -3,7 +3,7 @@
 
 
 King::King(Colour colour, Position pos)
-    : Piece(1e10, PieceType::King, colour, pos) {} // value is 1 bajillion to signify importance
+    : Piece(1e5, PieceType::King, colour, pos) {} // value is 1 bajillion to signify importance
 
 
 std::vector<Position> King::getRawMoves(const Board &b) {

@@ -12,6 +12,7 @@ class GameController {
     Player *players[2];             // Two players (could be Human or Computer)
     Colour turn;                    // Whose turn is it? White/Black
     std::vector<Display*> displays; // Attached displays (Text/Graphical)
+    bool isGameRunning = false;
 
 public:
     GameController();
@@ -21,6 +22,7 @@ public:
     void startGame(Player* white, Player* black);  // Initialize board, players
     void attachDisplay(Display* d);                // Add a display observer
     void setBoard(Board* newBoard);
+    Player* createPlayerFromString(const std::string& type, Colour c);
 
     // Main game loop helpers
     void processCommand(const std::string& cmd);   // For user commands

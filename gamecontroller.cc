@@ -1,4 +1,6 @@
 #include "gamecontroller.h"
+#include "humanplayer.h"
+#include "ailevel1.h"
 #include <sstream>
 #include <iostream>
 
@@ -12,7 +14,7 @@ static Position parseAlgebraic(const std::string &sq) {
 }
 
 
-GameController::GameController() : turn{Colour::White} {
+GameController::GameController() : turn(Colour::White), isGameRunning(false) {
     board = new Board();
     players[0] = nullptr;
     players[1] = nullptr;
@@ -27,10 +29,11 @@ GameController::~GameController() {
 
 
 void GameController::startGame(Player* white, Player* black) {
-    players[0] = white;
-    players[1] = black;
-    turn = Colour::White;
-    board->resetBoard();
+    players[0] = white;     // player0 is white
+    players[1] = black;     // player1 is black
+    turn = Colour::White;   // start with white
+    board->resetBoard();    // clean up board
+    isGameRunning = true;   // start the game
 
     std::cout << "Game started! White moves first.\n";
 
@@ -74,13 +77,51 @@ void GameController::nextTurn() {
 }
 
 
-// Process commands like "move e2 e4"
+Player* GameController::createPlayerFromString(const std::string& type, Colour c) {
+    if (type == "human") {
+        return new HumanPlayer(c);
+    } else if (type.find("computer") == 0) {
+        // For now, all computer types map to AILevel1; extend as needed
+    }
+    return nullptr;
+}
+
+
 void GameController::processCommand(const std::string& cmd) {
     std::istringstream iss(cmd);
     std::string action;
     iss >> action;
 
-    if (action == "move") {
+    if (action == "game") {
+        // Start a new game: e.g. "game human computer1"
+        std::string whitePlayerType, blackPlayerType;
+        iss >> whitePlayerType >> blackPlayerType;
+
+        if (whitePlayerType.empty() || blackPlayerType.empty()) {
+            std::cout << "Usage: game white-player black-player\n";
+            return;
+        }
+
+        Player* whitePlayer = createPlayerFromString(whitePlayerType, Colour::White);
+        Player* blackPlayer = createPlayerFromString(blackPlayerType, Colour::Black);
+
+        if (!whitePlayer || !blackPlayer) {
+            std::cout << "Invalid player types.\n";
+            return;
+        }
+
+        // Clean up old players if owned here (optional)
+        players[0] = whitePlayer;
+        players[1] = blackPlayer;
+
+        startGame(whitePlayer, blackPlayer);
+    }
+    else if (action == "move") {
+        if (!isGameRunning) {
+            std::cout << "No game is currently running. Use 'game' command to start.\n";
+            return;
+        }
+
         std::string fromSq, toSq;
         iss >> fromSq >> toSq;
         if (fromSq.empty() || toSq.empty()) {
@@ -113,14 +154,22 @@ void GameController::processCommand(const std::string& cmd) {
         board->notifyObservers();
 
         // Check game state (check/checkmate)
-        if (checkGameState()) return;
+        if (checkGameState()) {
+            isGameRunning = false;
+            return;
+        }
 
         // Next player's turn
         nextTurn();
     }
     else if (action == "resign") {
+        if (!isGameRunning) {
+            std::cout << "No game is currently running.\n";
+            return;
+        }
         std::cout << (turn == Colour::White ? "White" : "Black") << " resigns! "
                   << (turn == Colour::White ? "Black" : "White") << " wins!\n";
+        isGameRunning = false;
     }
     else {
         std::cout << "Unknown command.\n";
