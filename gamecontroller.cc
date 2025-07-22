@@ -4,15 +4,12 @@
 #include <sstream>
 #include <iostream>
 
-
-// helper: convert algebraic notation ("e2") to Position
+// Helper: convert algebraic notation ("e2") → Position
 static Position parseAlgebraic(const std::string &sq) {
-    // 'a' -> 0, '1' -> 0
     int col = sq[0] - 'a';
     int row = sq[1] - '1';
     return Position(row, col);
 }
-
 
 GameController::GameController() : turn(Colour::White), isGameRunning(false) {
     board = new Board();
@@ -20,72 +17,71 @@ GameController::GameController() : turn(Colour::White), isGameRunning(false) {
     players[1] = nullptr;
 }
 
-
 GameController::~GameController() {
-    // Don't delete players -> they might be stack-allocated elsewhere
-    // Displays may also be owned externally
     delete board;
+    // Note: players are NOT deleted, assumed external ownership
 }
 
+void GameController::attachDisplay(Display* d) {
+    displays.push_back(d);
+}
+
+void GameController::setBoard(Board* newBoard) {
+    if (board) delete board;
+    board = newBoard;
+}
+
+Board& GameController::getBoard() {
+    return *board;
+}
+
+Colour GameController::getCurrentTurn() const {
+    return turn;
+}
 
 void GameController::startGame(Player* white, Player* black) {
-    players[0] = white;     // player0 is white
-    players[1] = black;     // player1 is black
-    turn = Colour::White;   // start with white
-    board->resetBoard();    // clean up board
-    isGameRunning = true;   // start the game
+    players[0] = white;
+    players[1] = black;
+    turn = Colour::White;
+    board->resetBoard();
+    isGameRunning = true;
 
     std::cout << "Game started! White moves first.\n";
 
     // Attach all displays as observers
     for (auto d : displays) {
         board->attach(d);
-        d->notify(*board); // initial render
+        d->notify(*board);
     }
 }
-
-
-void GameController::attachDisplay(Display* d) {
-    displays.push_back(d);
-}
-
-
-void GameController::setBoard(Board* newBoard) {
-    if (board) delete board;  // clean up old board
-    board = newBoard;
-}
-
-
-Colour GameController::getCurrentTurn() const {
-    return turn;
-}
-
-
-Player* GameController::getCurrentPlayer() {
-    // turn == White -> players[0], turn == Black -> players[1]
-    return (turn == Colour::White) ? players[0] : players[1];
-}
-
-
-Board &GameController::getBoard() {
-    return *board;
-}
-
-
-void GameController::nextTurn() {
-    turn = (turn == Colour::White) ? Colour::Black : Colour::White;
-}
-
 
 Player* GameController::createPlayerFromString(const std::string& type, Colour c) {
     if (type == "human") {
         return new HumanPlayer(c);
     } else if (type.find("computer") == 0) {
-        // For now, all computer types map to AILevel1; extend as needed
+        // :p
     }
     return nullptr;
 }
 
+void GameController::nextTurn() {
+    turn = (turn == Colour::White) ? Colour::Black : Colour::White;
+}
+
+bool GameController::checkGameState() {
+    if (board->isCheckMate(turn)) {
+        std::cout << (turn == Colour::White ? "White" : "Black")
+                  << " is checkmated! "
+                  << (turn == Colour::White ? "Black" : "White")
+                  << " wins!\n";
+        return true;
+    }
+    else if (board->isInCheck(turn)) {
+        std::cout << (turn == Colour::White ? "White" : "Black")
+                  << " is in check!\n";
+    }
+    return false;
+}
 
 void GameController::processCommand(const std::string& cmd) {
     std::istringstream iss(cmd);
@@ -108,9 +104,11 @@ void GameController::processCommand(const std::string& cmd) {
         handleNormalCommand(action, iss);
 }
 
-
+// =====================
+// Setup mode commands
+// =====================
 void GameController::handleSetupCommand(const std::string &action, std::istringstream &iss) {
-    static Colour forcedTurn = turn;  // Keep last chosen turn
+    static Colour forcedTurn = turn; // keep last chosen turn
 
     if (action == "+") {
         char pieceChar;
@@ -157,20 +155,44 @@ void GameController::handleSetupCommand(const std::string &action, std::istrings
         }
         turn = forcedTurn;
         inSetupMode = false;
-        std::cout << "Setup complete.";
+        std::cout << "Setup complete.\n";
     }
     else {
         std::cout << "Unknown setup command. Use +, -, =, done.\n";
     }
 }
 
-
+// =====================
+// Normal commands
+// =====================
 void GameController::handleNormalCommand(const std::string &action, std::istringstream &iss) {
     if (action == "game") {
         cmdGame(iss);
     }
     else if (action == "move") {
-        cmdMove(iss);
+        if (!isGameRunning) {
+            std::cout << "No game running. Use 'game' to start.\n";
+            return;
+        }
+
+        Player* currentPlayer = (turn == Colour::White) ? players[0] : players[1];
+        if (!currentPlayer) {
+            std::cout << "No player for this colour.\n";
+            return;
+        }
+
+        // Let the player handle the move 
+        if (!currentPlayer->makeMove(*board, iss)) {
+            std::cout << "Invalid move.\n";
+            return;
+        }
+
+        board->notifyObservers();
+        if (checkGameState()) {
+            isGameRunning = false;
+            return;
+        }
+        nextTurn();
     }
     else if (action == "resign") {
         cmdResign();
@@ -179,7 +201,6 @@ void GameController::handleNormalCommand(const std::string &action, std::istring
         std::cout << "Unknown command.\n";
     }
 }
-
 
 void GameController::cmdGame(std::istringstream &iss) {
     std::string whitePlayerType, blackPlayerType;
@@ -198,54 +219,8 @@ void GameController::cmdGame(std::istringstream &iss) {
         return;
     }
 
-    players[0] = whitePlayer;
-    players[1] = blackPlayer;
     startGame(whitePlayer, blackPlayer);
 }
-
-
-void GameController::cmdMove(std::istringstream &iss) {
-    if (!isGameRunning) {
-        std::cout << "No game is currently running. Use 'game' to start.\n";
-        return;
-    }
-
-    std::string fromSq, toSq;
-    iss >> fromSq >> toSq;
-    if (fromSq.empty() || toSq.empty()) {
-        std::cout << "Usage: move <from> <to>\n";
-        return;
-    }
-
-    Position from = parseAlgebraic(fromSq);
-    Position to = parseAlgebraic(toSq);
-
-    Piece* piece = board->getPieceAt(from);
-    if (!piece) {
-        std::cout << "No piece at " << fromSq << "\n";
-        return;
-    }
-    if (piece->getColour() != turn) {
-        std::cout << "It's not your turn!\n";
-        return;
-    }
-
-    // Perform move
-    if (!board->movePiece(from, to)) {
-        std::cout << "Invalid move!\n";
-        return;
-    }
-    board->notifyObservers();
-
-    // Check for check/checkmate
-    if (checkGameState()) {
-        isGameRunning = false;
-        return;
-    }
-
-    nextTurn();
-}
-
 
 void GameController::cmdResign() {
     if (!isGameRunning) {
@@ -257,17 +232,4 @@ void GameController::cmdResign() {
               << (turn == Colour::White ? "Black" : "White")
               << " wins!\n";
     isGameRunning = false;
-}
-
-
-bool GameController::checkGameState() {
-    if (board->isCheckMate(turn)) {
-        std::cout << (turn == Colour::White ? "White" : "Black") << " is checkmated! "
-                  << (turn == Colour::White ? "Black" : "White") << " wins!\n";
-        return true;
-    }
-    else if (board->isInCheck(turn)) {
-        std::cout << (turn == Colour::White ? "White" : "Black") << " is in check!\n";
-    }
-    return false;
 }
