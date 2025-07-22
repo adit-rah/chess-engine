@@ -1,18 +1,60 @@
 #include "board.h"
 #include "piece.h"
+#include "pawn.h"
+#include "rook.h"
+#include "knight.h"
+#include "bishop.h"
+#include "queen.h"
+#include "king.h"
 
 Board::Board() {
-    pieces = new Piece**[8];
+    pieces = new Piece*[8];
     for (int i = 0; i < 8; ++i) {
-        pieces[i] = new Piece*[8];
-        for (int j = 0; j < 8; ++j) {
-            pieces[i][j] = nullptr;
-        }
+        pieces[i] = new Piece[8];
     }
-    setPieces() 
+    setPieces(); 
 }
 
-Piece* Board::getPieceAt(Position p) {
+void Board::setPieces() {
+    // === WHITE PIECES ===
+    // Pawns
+    for (int c = 0; c < 8; ++c) {
+        pieces[1][c] = new Pawn(Colour::White, Position(1, c));
+    }
+    // Back row
+    pieces[0][0] = new Rook(Colour::White, Position(0,0));
+    pieces[0][7] = new Rook(Colour::White, Position(0,7));
+    pieces[0][1] = new Knight(Colour::White, Position(0,1));
+    pieces[0][6] = new Knight(Colour::White, Position(0,6));
+    pieces[0][2] = new Bishop(Colour::White, Position(0,2));
+    pieces[0][5] = new Bishop(Colour::White, Position(0,5));
+    pieces[0][3] = new Queen(Colour::White, Position(0,3));
+    pieces[0][4] = new King(Colour::White, Position(0,4));
+
+    // === BLACK PIECES ===
+    // Pawns
+    for (int c = 0; c < 8; ++c) {
+        pieces[6][c] = new Pawn(Colour::Black, Position(6, c));
+    }
+    // Back row
+    pieces[7][0] = new Rook(Colour::Black, Position(7,0));
+    pieces[7][7] = new Rook(Colour::Black, Position(7,7));
+    pieces[7][1] = new Knight(Colour::Black, Position(7,1));
+    pieces[7][6] = new Knight(Colour::Black, Position(7,6));
+    pieces[7][2] = new Bishop(Colour::Black, Position(7,2));
+    pieces[7][5] = new Bishop(Colour::Black, Position(7,5));
+    pieces[7][3] = new Queen(Colour::Black, Position(7,3));
+    pieces[7][4] = new King(Colour::Black, Position(7,4));
+
+    // === EMPTY SQUARES ===
+    for (int r = 2; r <= 5; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            pieces[r][c] = nullptr; // or new EmptyPiece if you prefer
+        }
+    }
+}
+
+Piece* Board::getPieceAt(Position p) const {
     if (p.row < 0 || p.row >= 8 || p.col < 0 || p.col >= 8) {
         return nullptr; 
     }

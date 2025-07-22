@@ -4,21 +4,21 @@
 #include "subject.h";
 #include "piece.h";  
 
-class Board : public subject {
+class Board : public Subject {
     Piece **pieces;
 
     public:
     Board();
-    virtual void setPieces();
+    void setPieces();
 
     Piece* getPieceAt(Position p) const;
-    bool movePiece(Position from, Position to);
+    bool movePiece(Position from, Position to); // this should not fail, but still better for error handling
     bool validMove(Position frome, Position to) const;  // added this one  
     bool canMove(Piece& p) const;
 
-    std::vector<Position> squaresBeingAttacked(Color c) const;
-    bool isCheckMate(Color c) const;
-    Position findKing(Color c) const;                   // and this one
+    std::vector<Position> squaresBeingAttacked(Colour c) const;
+    bool isCheckMate(Colour c) const;
+    Position findKing(Colour c) const;                   // and this one
 
     void resetBoard();
 }

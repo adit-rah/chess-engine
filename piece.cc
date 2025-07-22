@@ -1,23 +1,53 @@
 #include "piece.h"
 
+// Position's implementations
+Position::Position(int r = 0, int c = 0) : row{r}, col{c} {}
+
+
 bool Position::operator==(const Position& other){
    return row == other.row && col == other.col;
 }
 
+// Piece's implementations
+Piece::Piece() :
+    value{0}, type{PieceType::None}, colour{Colour::None}, pos{0,0} {}  // default
+
+
 Piece::Piece(int value, PieceType type, Colour colour, Position pos) :
     value{value}, type{type}, colour{colour}, pos{pos} {}
 
-Colour Piece::getColour(){
-    return this.colour;
+
+Piece& Piece::operator=(const Piece& other) {
+    if (this == &other) return *this;
+
+    this->value = other.value;
+    this->type = other.type;
+    this->colour = other.colour;
+    this->pos = other.pos;
+
+    return *this;
 }
 
-Position Piece::getPosition(){
-    return this.pos;
+
+Colour Piece::getColour() {
+    return colour;
 }
+
+
+PieceType Piece::getType() { 
+    return type; 
+}
+
+
+Position Piece::getPosition() {
+    return pos;
+}
+
 
 void Piece::setPosition(Position p){
     pos = p;
 }
+
 
 char Piece::getSymbol(){
     if (type == PieceType::King) return 'K';
@@ -30,7 +60,12 @@ char Piece::getSymbol(){
 }
 
 
-Piece* createPiece(int row, int col, Colour c) {
+Piece* Piece::createPiece(int row, int col, Colour c) {
     Position pos{row, col};
-    return Piece(0, PieceType::None, Colour::None, pos); // Default case for empty squares
+    return new Piece(0, PieceType::None, c, pos); // Default case for empty squares
+}
+
+
+std::vector<Position> Piece::getValidMoves(const Board &b) {
+    // blank piece DOES NOT have moves by default
 }

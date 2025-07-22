@@ -8,9 +8,10 @@ enum class Colour {White, Black, None};
 enum class PieceType {None, Pawn, Bishop, Knight, Rook, Queen, King};
 
 class Position {
-    int row;
-    int col;
     public:
+        int row;
+        int col;
+        Position(int r = 0, int c = 0); 
         bool operator==(const Position& other);
 };
 
@@ -21,19 +22,19 @@ class Piece {
     Position pos;
 
     public:
-        virtual ~Piece() {}
+        Piece();
         Piece(int value, PieceType type, Colour colour, Position pos);
         Piece& operator=(const Piece& other);
+        virtual ~Piece() {}
 
         Colour getColour();
         Position getPosition();
         void setPosition(Position p);
         char getSymbol();
-        PieceType getType() { return type; }
+        PieceType getType();
         
-        virtual Piece* createPiece(int row, int col);
-        virtual std::vector<Position> getRawMoves() = 0;                    //abstract method
-        virtual std::vector<Position> getValidMoves(const Board &b) = 0;    //abstract method
+        virtual Piece* createPiece(int row, int col, Colour c);
+        virtual std::vector<Position> getValidMoves(const Board &b);
 
 };
 
