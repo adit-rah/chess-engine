@@ -13,6 +13,7 @@ static Position parseAlgebraic(const std::string &sq) {
 
 
 GameController::GameController() : turn{Colour::White} {
+    board = new Board();
     players[0] = nullptr;
     players[1] = nullptr;
 }
@@ -21,6 +22,7 @@ GameController::GameController() : turn{Colour::White} {
 GameController::~GameController() {
     // Don't delete players -> they might be stack-allocated elsewhere
     // Displays may also be owned externally
+    delete board;
 }
 
 
@@ -28,20 +30,26 @@ void GameController::startGame(Player* white, Player* black) {
     players[0] = white;
     players[1] = black;
     turn = Colour::White;
-    board.resetBoard();
+    board->resetBoard();
 
     std::cout << "Game started! White moves first.\n";
 
     // Attach all displays as observers
     for (auto d : displays) {
-        board.attach(d);
-        d->notify(board); // initial render
+        board->attach(d);
+        d->notify(*board); // initial render
     }
 }
 
 
 void GameController::attachDisplay(Display* d) {
     displays.push_back(d);
+}
+
+
+void GameController::setBoard(Board* newBoard) {
+    if (board) delete board;  // clean up old board
+    board = newBoard;
 }
 
 
@@ -57,7 +65,7 @@ Player* GameController::getCurrentPlayer() {
 
 
 Board &GameController::getBoard() {
-    return board;
+    return *board;
 }
 
 
@@ -83,7 +91,7 @@ void GameController::processCommand(const std::string& cmd) {
         Position from = parseAlgebraic(fromSq);
         Position to = parseAlgebraic(toSq);
 
-        Piece* piece = board.getPieceAt(from);
+        Piece* piece = board->getPieceAt(from);
         if (!piece) {
             std::cout << "No piece at " << fromSq << "\n";
             return;
@@ -93,16 +101,16 @@ void GameController::processCommand(const std::string& cmd) {
             return;
         }
 
-        if (!board.validMove(from, to)) {
+        if (!board->validMove(from, to)) {
             std::cout << "Invalid move!\n";
             return;
         }
 
         // Perform the move
-        board.movePiece(from, to);
+        board->movePiece(from, to);
 
         // Notify displays
-        board.notifyObservers();
+        board->notifyObservers();
 
         // Check game state (check/checkmate)
         if (checkGameState()) return;
@@ -120,12 +128,12 @@ void GameController::processCommand(const std::string& cmd) {
 }
 
 bool GameController::checkGameState() {
-    if (board.isCheckMate(turn)) {
+    if (board->isCheckMate(turn)) {
         std::cout << (turn == Colour::White ? "White" : "Black") << " is checkmated! "
                   << (turn == Colour::White ? "Black" : "White") << " wins!\n";
         return true;
     }
-    else if (board.isInCheck(turn)) {
+    else if (board->isInCheck(turn)) {
         std::cout << (turn == Colour::White ? "White" : "Black") << " is in check!\n";
     }
     return false;

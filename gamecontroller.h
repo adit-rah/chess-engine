@@ -8,8 +8,8 @@
 #include <string>
 
 class GameController {
-    Board board;                    // Owns the chess board
-    Player* players[2];             // Two players (could be Human or Computer)
+    Board *board;                   // Owns the chess board
+    Player *players[2];             // Two players (could be Human or Computer)
     Colour turn;                    // Whose turn is it? White/Black
     std::vector<Display*> displays; // Attached displays (Text/Graphical)
 
@@ -20,6 +20,7 @@ public:
     // Core setup
     void startGame(Player* white, Player* black);  // Initialize board, players
     void attachDisplay(Display* d);                // Add a display observer
+    void setBoard(Board* newBoard);
 
     // Main game loop helpers
     void processCommand(const std::string& cmd);   // For user commands
