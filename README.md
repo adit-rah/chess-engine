@@ -1,6 +1,14 @@
 # Chess
 
-Hello
+## how to use
+compile with make
+make        --> makes ./chess executable
+make run    --> makes it and runs it
+make clean  --> cleans up ur directory
+
+## fish to fry
+- add them here
+
 
 ## Getting started
 
