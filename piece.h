@@ -8,10 +8,11 @@ enum class Colour {White, Black, None};
 enum class PieceType {None, Pawn, Bishop, Knight, Rook, Queen, King};
 
 class Position {
-    int row;
-    int col;
     public:
-        bool operator==(const Position& other);
+        int row;
+        int col;
+        Position(int r = 0, int c = 0); 
+        bool operator==(const Position& other) const;
 };
 
 class Piece {
@@ -21,13 +22,23 @@ class Piece {
     Position pos;
 
     public:
-        virtual ~Piece() {}
+        Piece();
+        Piece(Position pos);
         Piece(int value, PieceType type, Colour colour, Position pos);
+        Piece& operator=(const Piece& other);
+        virtual ~Piece() {}
+
         Colour getColour();
         Position getPosition();
         void setPosition(Position p);
         char getSymbol();
-        virtual std::vector<Position> getValidMoves() = 0; //abstract method
+        PieceType getType();
+        
+        // abstract method(s)
+        // slightly misleading since it still prunes moves out based on "visibility"
+        virtual std::vector<Position> getRawMoves(const Board &b) = 0;
+        // gets game legal moves
+        virtual std::vector<Position> getValidMoves(Board &b);
 
 };
 

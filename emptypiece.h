@@ -1,11 +1,11 @@
-#ifndef KING_H
-#define KING_H
+#ifndef EMPTYPIECE_H
+#define EMPTYPIECE_H
 
 #include "piece.h"
 
-class King : public Piece {
+class EmptyPiece : public Piece {
 public:
-    King(Colour colour, Position pos);
+    EmptyPiece(Position pos);
 
     std::vector<Position> getRawMoves(const Board &b) override;
     // std::vector<Position> getValidMoves(Board &b) override;
