@@ -85,7 +85,7 @@ Piece* Board::getPieceAt(Position p) const {
 }
 
 
-bool Board::validMove(Position from, Position to) { // this won't be const for speed
+bool Board::isBoardLegalMove(Position from, Position to) { // this won't be const for speed
     Piece* movingPiece = getPieceAt(from);
     if (!movingPiece) return false;
 

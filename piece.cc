@@ -70,7 +70,7 @@ std::vector<Position> Piece::getValidMoves(Board &b) {
     std::vector<Position> moves; 
 
     for (Position &move: rawMoves) {
-        if (b.validMove(current, move)) {
+        if (b.isBoardLegalMove(current, move)) {
             moves.push_back(move); 
         }
     }
