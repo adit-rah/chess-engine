@@ -27,9 +27,9 @@ public:
     
     // returns the piece at that position
     Piece* getPieceAt(Position p) const;
-    // checks if a move is "board legal" (ie. it conforms to the rules of the board) 
-    // for the default board this includes: if a move exposes the king
-    bool validMove(Position frome, Position to); 
+    // checks if a move is board-legal: i.e., it doesn’t leave the moving side’s king in check.
+    // does NOT verify the piece’s own movement rules—only overall board legality.
+    bool validMove(Position from, Position to);
     // moves the piece, returns false if invalid move
     bool movePiece(Position from, Position to); 
     // checks if a piece can move 
