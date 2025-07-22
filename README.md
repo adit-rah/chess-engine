@@ -1,10 +1,10 @@
 # Chess
 
 ## how to use
-compile with make
-make        --> makes ./chess executable
-make run    --> makes it and runs it
-make clean  --> cleans up ur directory
+compile with make <br>
+**make**        --> makes ./chess executable <br>
+**make run**    --> makes it and runs it <br>
+**make clean**  --> cleans up ur directory <br>
 
 ## fish to fry
 - add them here
