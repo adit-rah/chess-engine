@@ -8,16 +8,18 @@
 #include <string>
 
 class GameController {
-    Board *board;                   // Owns the chess board
-    Player *players[2];             // Two players (could be Human or Computer)
-    Colour turn;                    // Whose turn is it? White/Black
-    std::vector<Display*> displays; // Attached displays (Text/Graphical)
-    bool isGameRunning = false;
+    Board *board;                       // Owns the chess board
+    Player *players[2];                 // Two players (could be Human or Computer)
+    Colour turn;                        // Whose turn is it? White/Black
+    std::vector<Display*> displays;     // Attached displays (Text/Graphical)
+    
+    bool isGameRunning = false;         // flags
     bool inSetupMode = false;
-    void handleSetupCommand(const std::string &action, std::istringstream &iss);    // done for 
-    void handleNormalCommand(const std::string &action, std::istringstream &iss);   // clarity sake
+
+    // Command Handling
+    void handleSetupCommand(const std::string &action, std::istringstream &iss);
+    void handleNormalCommand(const std::string &action, std::istringstream &iss);
     void cmdGame(std::istringstream &iss);
-    void cmdMove(std::istringstream &iss);
     void cmdResign();
 
 public:
@@ -31,13 +33,12 @@ public:
     Player* createPlayerFromString(const std::string& type, Colour c);
 
     // Main game loop helpers
-    void processCommand(const std::string& cmd);   // For user commands
+    void processCommand(const std::string &cmd);
     void nextTurn();                               // Switch to the other player
-    bool checkGameState();                         // Detect check, checkmate, stalemate
+    bool checkGameState();                         // Detect check, checkmate, stalemate;
 
     // Utility
     Colour getCurrentTurn() const;
-    Player* getCurrentPlayer();
     Board& getBoard();
 };
 

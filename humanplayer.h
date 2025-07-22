@@ -6,7 +6,7 @@
 class HumanPlayer : public Player {
 public:
     HumanPlayer(Colour c) : Player(c) {}
-    bool makeMove(Board &board) override;
+    bool makeMove(Board &board, std::istringstream &iss) override;
 };
 
 #endif

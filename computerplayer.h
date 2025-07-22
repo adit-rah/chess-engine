@@ -7,7 +7,7 @@
 class ComputerPlayer : public Player {
 public:
     ComputerPlayer(Colour c) : Player(c) {}
-    bool makeMove(Board &board) override;
+    bool makeMove(Board &board, std::istringstream &iss) override;
 
     virtual Position determineNextBestMove(Board &b) = 0;
 };
