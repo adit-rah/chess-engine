@@ -24,11 +24,12 @@ public:
     // Main game loop helpers
     void processCommand(const std::string& cmd);   // For user commands
     void nextTurn();                               // Switch to the other player
-    void checkGameState();                         // Detect check, checkmate, stalemate
+    bool checkGameState();                         // Detect check, checkmate, stalemate
 
     // Utility
     Colour getCurrentTurn() const;
     Player* getCurrentPlayer();
+    Board& getBoard();
 };
 
 #endif
