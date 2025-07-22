@@ -60,3 +60,18 @@ char Piece::getSymbol(){
     else if (type == PieceType::Pawn) return 'P';
     else if (type == PieceType::None) return '_';
 }
+
+// this isn't abstract since this tends to be (except for pawn and king) the case
+std::vector<Position> Piece::getValidMoves(Board &b) {
+    std::vector<Position> rawMoves = getRawMoves(b);
+    Position current = getPosition();
+    std::vector<Position> moves; 
+
+    for (Position &move: rawMoves) {
+        if (b.validMove(current, move)) {
+            moves.push_back(move); 
+        }
+    }
+    
+    return moves;
+}

@@ -38,7 +38,7 @@ class Piece {
         // slightly misleading since it still prunes moves out based on "visibility"
         virtual std::vector<Position> getRawMoves(const Board &b) = 0;
         // gets game legal moves
-        virtual std::vector<Position> getValidMoves(const Board &b) = 0;
+        virtual std::vector<Position> getValidMoves(Board &b);
 
 };
 
