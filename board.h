@@ -1,8 +1,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include "subject.h";
-#include "piece.h";  
+#include "subject.h"
+#include "piece.h"
 
 class Board : public Subject {
     Piece ***pieces;    // "triple pointer AHH", no it's not that bad.
@@ -20,13 +20,13 @@ public:
     Piece* getPieceAt(Position p) const;
     bool validMove(Position frome, Position to); 
     bool movePiece(Position from, Position to); 
-    bool canMove(Piece& p) const;
+    bool canMove(Piece& p);
 
     // attacking logic and handling
     std::vector<Position> squaresBeingAttackedBy(Colour c) const;
     bool isInCheck(Colour c) const;
-    bool isCheckMate(Colour c) const;
-    Position findKing(Colour c) const;                   // and this one
-}
+    bool isCheckMate(Colour c);
+    Position findKing(Colour c) const;
+};
 
 #endif

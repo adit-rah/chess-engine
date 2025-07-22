@@ -127,7 +127,7 @@ bool Board::movePiece(Position from, Position to) {
 }
 
 
-bool Board::canMove(Piece& p) const {
+bool Board::canMove(Piece& p) {
     std::vector<Position> validMoves = p.getValidMoves(*this);
     return !validMoves.empty();
 }
@@ -177,7 +177,7 @@ bool Board::isInCheck(Colour c) const {
 
 
 
-bool Board::isCheckMate(Colour c) const {
+bool Board::isCheckMate(Colour c) {
     // Check if the player has any valid moves left
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {

@@ -1,7 +1,8 @@
 #include "piece.h"
+#include "board.h"
 
 // Position's implementations
-Position::Position(int r = 0, int c = 0) : row{r}, col{c} {}
+Position::Position(int r, int c) : row{r}, col{c} {}
 
 
 bool Position::operator==(const Position& other) const{
@@ -59,6 +60,7 @@ char Piece::getSymbol(){
     else if (type == PieceType::Bishop) return 'B';
     else if (type == PieceType::Pawn) return 'P';
     else if (type == PieceType::None) return '_';
+    return ' ';
 }
 
 // this isn't abstract since this tends to be (except for pawn and king) the case

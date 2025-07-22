@@ -2,7 +2,9 @@
 #define PIECE_H
 #include <iostream>
 #include <vector>
-#include "board.h"
+
+
+class Board; 
 
 enum class Colour {White, Black, None};
 enum class PieceType {None, Pawn, Bishop, Knight, Rook, Queen, King};

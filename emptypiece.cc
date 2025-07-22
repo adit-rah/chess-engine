@@ -8,4 +8,6 @@ EmptyPiece::EmptyPiece(Position pos)
 
 std::vector<Position> EmptyPiece::getRawMoves(const Board &b) {
     // blank piece DOES NOT have moves by default
+    std::vector<Position> moves; // empty vector
+    return moves;
 }
