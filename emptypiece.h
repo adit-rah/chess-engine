@@ -1,12 +1,13 @@
-#ifndef ROOK_H
-#define ROOK_H
+#ifndef EMPTYPIECE_H
+#define EMPTYPIECE_H
 
 #include "piece.h"
 
-class Rook : public Piece {
+class EmptyPiece : public Piece {
 public:
-    Rook(Colour colour, Position pos);
+    EmptyPiece(Position pos);
 
+    Piece* createPiece(int row, int col, Colour c) override;  
     std::vector<Position> getRawMoves(const Board &b) override;
     std::vector<Position> getValidMoves(const Board &b) override;
 };

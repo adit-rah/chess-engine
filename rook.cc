@@ -10,8 +10,8 @@ Piece* Rook::createPiece(int row, int col, Colour c) {
     return new Rook(c, Position(row, col));
 }
 
-// still does not check for king safety
-std::vector<Position> Rook::getValidMoves(const Board &b) {
+// still does not check for king safety and other such rules
+std::vector<Position> Rook::getRawMoves(const Board &b) {
     std::vector<Position> moves;
     Position current = getPosition();
     Colour myColour = getColour();

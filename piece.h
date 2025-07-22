@@ -12,7 +12,7 @@ class Position {
         int row;
         int col;
         Position(int r = 0, int c = 0); 
-        bool operator==(const Position& other);
+        bool operator==(const Position& other) const;
 };
 
 class Piece {
@@ -23,6 +23,7 @@ class Piece {
 
     public:
         Piece();
+        Piece(Position pos);
         Piece(int value, PieceType type, Colour colour, Position pos);
         Piece& operator=(const Piece& other);
         virtual ~Piece() {}
@@ -33,8 +34,11 @@ class Piece {
         char getSymbol();
         PieceType getType();
         
-        virtual Piece* createPiece(int row, int col, Colour c);
-        virtual std::vector<Position> getValidMoves(const Board &b);
+        // abstract method(s)
+        // slightly misleading since it still prunes moves out based on "visibility"
+        virtual std::vector<Position> getRawMoves(const Board &b) = 0;
+        // gets game legal moves
+        virtual std::vector<Position> getValidMoves(const Board &b) = 0;
 
 };
 

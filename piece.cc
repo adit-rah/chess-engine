@@ -4,7 +4,7 @@
 Position::Position(int r = 0, int c = 0) : row{r}, col{c} {}
 
 
-bool Position::operator==(const Position& other){
+bool Position::operator==(const Position& other) const{
    return row == other.row && col == other.col;
 }
 
@@ -12,6 +12,8 @@ bool Position::operator==(const Position& other){
 Piece::Piece() :
     value{0}, type{PieceType::None}, colour{Colour::None}, pos{0,0} {}  // default
 
+Piece::Piece(Position pos) :
+    value{0}, type{PieceType::None}, colour{Colour::None}, pos{pos} {}  // default
 
 Piece::Piece(int value, PieceType type, Colour colour, Position pos) :
     value{value}, type{type}, colour{colour}, pos{pos} {}
@@ -57,15 +59,4 @@ char Piece::getSymbol(){
     else if (type == PieceType::Bishop) return 'B';
     else if (type == PieceType::Pawn) return 'P';
     else if (type == PieceType::None) return '_';
-}
-
-
-Piece* Piece::createPiece(int row, int col, Colour c) {
-    Position pos{row, col};
-    return new Piece(0, PieceType::None, c, pos); // Default case for empty squares
-}
-
-
-std::vector<Position> Piece::getValidMoves(const Board &b) {
-    // blank piece DOES NOT have moves by default
 }
