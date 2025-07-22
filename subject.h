@@ -1,7 +1,6 @@
 #ifndef SUBJECT_H
 #define SUBJECT_H
 
-
 class Observer;
 
 class Subject {
@@ -12,9 +11,5 @@ class Subject {
         void detach(Observer *o);
         void attach(Observer *o);
 };
-
-
-
-
 
 #endif

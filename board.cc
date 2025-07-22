@@ -1,14 +1,15 @@
 #include "board.h"
 #include "piece.h"
 
-Board() {
-     pieces = new Piece**[8];
-        for (int i = 0; i < 8; ++i) {
-            pieces[i] = new Piece*[8];
-            for (int j = 0; j < 8; ++j) {
-                pieces[i][j] = createPiece(i, j);
-            }
+Board::Board() {
+    pieces = new Piece**[8];
+    for (int i = 0; i < 8; ++i) {
+        pieces[i] = new Piece*[8];
+        for (int j = 0; j < 8; ++j) {
+            pieces[i][j] = nullptr;
         }
+    }
+    setPieces() 
 }
 
 Piece* Board::getPieceAt(Position p) {

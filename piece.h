@@ -23,14 +23,17 @@ class Piece {
     public:
         virtual ~Piece() {}
         Piece(int value, PieceType type, Colour colour, Position pos);
+        Piece& operator=(const Piece& other);
+
         Colour getColour();
         Position getPosition();
         void setPosition(Position p);
         char getSymbol();
         PieceType getType() { return type; }
-        Piece* createPiece(int row, int col);
-        virtual std::vector<Position> getRawMoves() = 0; //abstract method
-        virtual std::vector<Position> getValidMoves() = 0; //abstract method
+        
+        virtual Piece* createPiece(int row, int col);
+        virtual std::vector<Position> getRawMoves() = 0;                    //abstract method
+        virtual std::vector<Position> getValidMoves(const Board &b) = 0;    //abstract method
 
 };
 

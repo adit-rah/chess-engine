@@ -1,17 +1,25 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-class board : public subject {
+#include "subject.h";
+#include "piece.h";  
 
-    Piece ** pieces;
+class Board : public subject {
+    Piece **pieces;
 
     public:
     Board();
-    Piece* getPieceAt(Position p);
+    virtual void setPieces();
+
+    Piece* getPieceAt(Position p) const;
     bool movePiece(Position from, Position to);
-    std::vector<Position> squaresBeingAttacked(Color c);
-    bool isCheckMate(Color c);
-    bool canMove(Piece& p);
+    bool validMove(Position frome, Position to) const;  // added this one  
+    bool canMove(Piece& p) const;
+
+    std::vector<Position> squaresBeingAttacked(Color c) const;
+    bool isCheckMate(Color c) const;
+    Position findKing(Color c) const;                   // and this one
+
     void resetBoard();
 }
 
