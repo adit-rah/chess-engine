@@ -7,13 +7,17 @@
 #include "queen.h"
 #include "king.h"
 
+
 Board::Board() {
-    pieces = new Piece*[8];
+    pieces = new Piece**[8];
     for (int i = 0; i < 8; ++i) {
-        pieces[i] = new Piece[8];
+        pieces[i] = new Piece*[8];
+        for (int j = 0; j < 8; ++j) {
+            pieces[i][j] = nullptr;
+        }
     }
-    setPieces(); 
 }
+
 
 void Board::setPieces() {
     // === WHITE PIECES ===
@@ -54,6 +58,7 @@ void Board::setPieces() {
     }
 }
 
+
 Piece* Board::getPieceAt(Position p) const {
     if (p.row < 0 || p.row >= 8 || p.col < 0 || p.col >= 8) {
         return nullptr; 
@@ -61,26 +66,29 @@ Piece* Board::getPieceAt(Position p) const {
     return pieces[p.row][p.col];
 }
 
+
 bool Board::movePiece(Position from, Position to) {
     Piece* piece = getPieceAt(from);
     if (!piece) return false;
-    std::vector<Position> validMoves = piece->getValidMoves();
+    std::vector<Position> validMoves = piece->getValidMoves(*this);
     for (Position move : validMoves){
         if (move == to) {
             Piece * targetPiece = getPieceAt(to);
             // add inrecemnting player points here later
             pieces[to.row][to.col] = piece;
             // replace old position with empty piece
-            pieces[from.row][from.col] = new Pawn(Color::None, from);
+            pieces[from.row][from.col] = new Pawn(Colour::None, from);
             // delete captured piece
-            delete targetPiece; 
-            return true;
+            delete targetPiece;
 
-            }
+            return true;
         }
-        return false; // Invalid move
     }
-bool Board::isCheckMate(Color c) {
+    return false; // Invalid move
+}
+
+
+bool Board::isCheckMate(Colour c) const {
     // Check if the player has any valid moves left
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
@@ -95,18 +103,18 @@ bool Board::isCheckMate(Color c) {
     return true; // No valid moves left, it's checkmate
 }
 
-bool Board::canMove(Piece& p) {
+bool Board::canMove(Piece& p) const {
     std::vector<Position> validMoves = p.getValidMoves();
     return !validMoves.empty();
 }
 
-std::vector<Position> Board::squaresBeingAttacked(Color c) {
+std::vector<Position> Board::squaresBeingAttacked(Colour c) const {
     std::vector<Position> attackedSquares;
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
             Piece* piece = pieces[i][j];
             if (piece && piece->getColour() != c) {
-                std::vector<Position> validMoves = piece->getValidMoves();
+                std::vector<Position> validMoves = piece->getValidMoves(*this);
                 attackedSquares.insert(attackedSquares.end(), validMoves.begin(), validMoves.end());
             }
         }

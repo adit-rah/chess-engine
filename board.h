@@ -5,11 +5,15 @@
 #include "piece.h";  
 
 class Board : public Subject {
-    Piece **pieces;
+    Piece ***pieces;    // "triple pointer AHH", no it's not that bad.
+                        // It's just a 2-D array (chess board; the first two *) of Piece pointers
 
     public:
     Board();
+    ~Board();
+
     void setPieces();
+    void resetBoard();
 
     Piece* getPieceAt(Position p) const;
     bool movePiece(Position from, Position to); // this should not fail, but still better for error handling
@@ -19,8 +23,6 @@ class Board : public Subject {
     std::vector<Position> squaresBeingAttacked(Colour c) const;
     bool isCheckMate(Colour c) const;
     Position findKing(Colour c) const;                   // and this one
-
-    void resetBoard();
 }
 
 #endif
