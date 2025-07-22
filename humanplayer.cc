@@ -37,13 +37,8 @@ bool HumanPlayer::makeMove(Board &board) {
         return false;
     }
 
-    if (!board.validMove(from, to)) {
-        std::cout << "Invalid move!\n";
-        return false;
-    }
-
     if (!board.movePiece(from, to)) {
-        std::cout << "Move failed.\n";
+        std::cout << "Invalid move!\n";
         return false;
     }
 

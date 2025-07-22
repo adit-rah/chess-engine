@@ -229,13 +229,12 @@ void GameController::cmdMove(std::istringstream &iss) {
         std::cout << "It's not your turn!\n";
         return;
     }
-    if (!board->validMove(from, to)) {
+
+    // Perform move
+    if (!board->movePiece(from, to)) {
         std::cout << "Invalid move!\n";
         return;
     }
-
-    // Perform move
-    board->movePiece(from, to);
     board->notifyObservers();
 
     // Check for check/checkmate
