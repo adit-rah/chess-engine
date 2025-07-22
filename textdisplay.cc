@@ -32,7 +32,7 @@ void TextDisplay::notify(Subject& whoFrom) {
         }
         std::cout << "\n";
     }
-    std::cout << "abcdefgh\n";
+    std::cout << "  abcdefgh\n";
 
     // Display check/checkmate/stalemate status:
     if (board.isInCheck(Colour::White)) {
