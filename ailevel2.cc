@@ -19,13 +19,16 @@ std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
                     Piece* target = b.getPieceAt(to);
                     // Add points for capturing
                     if (target && target->getColour() == oppColour) {
-                        move_points += 1; // 1 point for capturing an opponent's piece
+                        move_points += target.getValue(); // 1 point for capturing an opponent's piece
                     }
                     // Add points for putting opponent in check
                     Piece* original = b.getPieceAt(to);
                     b.movePiece(Position(row, col), to);
-                    if (b.isInCheck(oppColour)) {
-                        move_points += 1; // 1  point for putting opponent in check
+                    if (b.isChckMate){
+                        move_points = 1000; // 1000 points for checkmate
+                    } 
+                    else if (b.isInCheck(oppColour)) {
+                        move_points += 5; // 1  point for putting opponent in check
                     }
                     // Undo the move
                     b.movePiece(to, Position(row, col));

@@ -29,7 +29,7 @@ class Piece {
         Piece(int value, PieceType type, Colour colour, Position pos);
         Piece& operator=(const Piece& other);
         virtual ~Piece() {}
-
+        int getValue() const;
         Colour getColour();
         Position getPosition();
         void setPosition(Position p);

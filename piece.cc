@@ -41,6 +41,9 @@ PieceType Piece::getType() {
     return type; 
 }
 
+int Piece::getValue() const {
+    return value;
+}
 
 Position Piece::getPosition() {
     return pos;

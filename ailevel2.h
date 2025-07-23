@@ -6,7 +6,6 @@
 class AILevel2 : public ComputerPlayer {
 public:
     AILevel2(Colour c) : ComputerPlayer(c) {}
-    bool makeMove(Board &boardbool, std::istringstream &iss) override;
     
 };
 
