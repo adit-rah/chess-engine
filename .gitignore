@@ -1,3 +1,6 @@
 *.o
 *.d
 chess
+*.in
+*.out
+tests

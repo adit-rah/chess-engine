@@ -88,19 +88,41 @@ Piece* Board::getPieceAt(Position p) const {
 
 
 bool Board::isBoardLegalMove(Position from, Position to) { // this won't be const for speed
-    Piece* movingPiece = getPieceAt(from);
-    if (!movingPiece) return false;
+    Piece* moving = getPieceAt(from);
+    if (!moving) return false;
 
-    // Temporarily apply move (ie. remove the piece)
-    pieces[from.row][from.col] = nullptr;
+    // Save original state
+    Piece* captured = getPieceAt(to);
 
-    // Check if own king is in check after move
-    bool isValid = !isInCheck(movingPiece->getColour());
+    // Temporarily move the piece
+    pieces[to.row][to.col] = moving;
+    moving->setPosition(to);
+    pieces[from.row][from.col] = new EmptyPiece(from);
 
-    // Revert move
-    pieces[from.row][from.col] = movingPiece;
+    // After move, find king
+    Colour side = moving->getColour();
+    Position kingPos = findKing(side);
 
-    return isValid;
+    // Get all attacked squares by opponent
+    Colour opp = (side == Colour::White ? Colour::Black : Colour::White);
+    std::vector<Position> attackedSquares = squaresBeingAttackedBy(opp);
+
+    // Check if king is in those attacked squares
+    bool stillInCheck = false;
+    for (auto &sq : attackedSquares) {
+        if (sq == kingPos) {
+            stillInCheck = true;
+            break;
+        }
+    }
+
+    // Undo the move
+    delete pieces[from.row][from.col];  // remove temporary EmptyPiece
+    pieces[from.row][from.col] = moving;
+    moving->setPosition(from);
+    pieces[to.row][to.col] = captured;
+
+    return !stillInCheck;
 }
 
 
@@ -353,17 +375,19 @@ bool Board::isInCheck(Colour c) const {
 
 
 bool Board::isCheckMate(Colour c) {
-    // Check if the player has any valid moves left
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
-            Piece* piece = pieces[i][j];
-            if (piece && piece->getColour() == c) {
-                if (canMove(*piece)) {
-                    return false; // Found a valid move, not checkmate
-                }
-            }
+    if (!isInCheck(c)) return false;
+
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            Piece* p = pieces[row][col];
+            if (!p || p->getColour() != c) continue;
+
+            std::vector<Position> moves = p->getValidMoves(*this);
+
+            if (!moves.empty()) return false; // found at least 1 legal move
         }
     }
+
     return true; // No valid moves left, it's checkmate
 }
 
