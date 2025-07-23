@@ -8,8 +8,10 @@
 #include "queen.h"
 #include "king.h"
 
+#include <iostream> // this is no joke for tolower and toupper
 
-// Constructor/Destructor
+
+// Constructor/Destructor 
 Board::Board() {
     pieces = new Piece**[8];
     for (int i = 0; i < 8; ++i) {
@@ -28,8 +30,9 @@ Board::~Board() {
 }
 
 
-// Board Handling methods
-void Board::setPieces() {               // default chess board
+// Board Handling methods (see .h for documentation)
+
+void Board::setPieces() {       // default chess board
     // === WHITE PIECES ===
     // Pawns
     for (int c = 0; c < 8; ++c) {
@@ -74,7 +77,8 @@ void Board::resetBoard() {
 }
 
 
-// Move Validation methods
+// Move Validation methods (see .h for documentation)
+
 Piece* Board::getPieceAt(Position p) const {
     if (p.row < 0 || p.row >= 8 || p.col < 0 || p.col >= 8) {
         return nullptr; 
@@ -82,22 +86,43 @@ Piece* Board::getPieceAt(Position p) const {
     return pieces[p.row][p.col];
 }
 
-// checks if a move is "board legal" (ie. it conforms to the rules of the board) 
-// for the default board this includes: if a move exposes the king
-bool Board::validMove(Position from, Position to) { // this won't be const for speed
-    Piece* movingPiece = getPieceAt(from);
-    if (!movingPiece) return false;
 
-    // Temporarily apply move (ie. remove the piece)
-    pieces[from.row][from.col] = nullptr;
+bool Board::isBoardLegalMove(Position from, Position to) { // this won't be const for speed
+    Piece* moving = getPieceAt(from);
+    if (!moving) return false;
 
-    // Check if own king is in check after move
-    bool isValid = !isInCheck(movingPiece->getColour());
+    // Save original state
+    Piece* captured = getPieceAt(to);
 
-    // Revert move
-    pieces[from.row][from.col] = movingPiece;
+    // Temporarily move the piece
+    pieces[to.row][to.col] = moving;
+    moving->setPosition(to);
+    pieces[from.row][from.col] = new EmptyPiece(from);
 
-    return isValid;
+    // After move, find king
+    Colour side = moving->getColour();
+    Position kingPos = findKing(side);
+
+    // Get all attacked squares by opponent
+    Colour opp = (side == Colour::White ? Colour::Black : Colour::White);
+    std::vector<Position> attackedSquares = squaresBeingAttackedBy(opp);
+
+    // Check if king is in those attacked squares
+    bool stillInCheck = false;
+    for (auto &sq : attackedSquares) {
+        if (sq == kingPos) {
+            stillInCheck = true;
+            break;
+        }
+    }
+
+    // Undo the move
+    delete pieces[from.row][from.col];  // remove temporary EmptyPiece
+    pieces[from.row][from.col] = moving;
+    moving->setPosition(from);
+    pieces[to.row][to.col] = captured;
+
+    return !stillInCheck;
 }
 
 
@@ -106,24 +131,127 @@ bool Board::movePiece(Position from, Position to) {
     if (!piece) return false;           // piece just doesn't exist, invalid move
 
     std::vector<Position> validMoves = piece->getValidMoves(*this);
-    for (Position move : validMoves){
-        if (move == to) {
-            Piece *targetPiece = getPieceAt(to);
 
-            // move the piece to the new position 
-            pieces[to.row][to.col] = piece;
-            piece->setPosition(Position(to.row, to.col));
-
-            // replace old position with empty piece
-            pieces[from.row][from.col] = new EmptyPiece(from);
-
-            // delete captured piece
-            delete targetPiece;
-
-            return true;
+    // checks if the move is valid
+    bool isValid = false;
+    for (auto &m : validMoves) {
+        if (m == to) { 
+            isValid = true;
+            break; 
         }
     }
-    return false; // Invalid move
+    if (!isValid) return false;
+
+    lastMoveFrom = from;
+    lastMoveTo = to;
+    lastMovePieceType = piece->getType();
+    // then moves the piece if it does exist
+    if (handleSpecialMoves(from, to)) {
+        return true;
+    }
+
+    Piece *targetPiece = getPieceAt(to);
+    // move the piece to the new position 
+    pieces[to.row][to.col] = piece;
+    piece->setPosition(to);
+    piece->setHasMoved(true);
+
+    // replace old position with empty piece
+    pieces[from.row][from.col] = new EmptyPiece(from);
+
+    // delete captured piece
+    delete targetPiece;
+
+    return true;
+}
+
+
+bool Board::handleSpecialMoves(Position from, Position to) {
+    Piece* piece = getPieceAt(from);    // guard clause from earlier saves this
+    if (!piece) return false;           // but just in case ;)
+
+    if (piece->getType() == PieceType::King) { // 1. castling
+        // castling requires moving 2 columns
+        int colDiff = to.col - from.col;
+        if (std::abs(colDiff) != 2) return false;
+
+        int row = from.row;
+
+        // determine rook side
+        bool kingSide = (colDiff > 0);
+
+        Position rookFrom = kingSide ? Position(row, 7) : Position(row, 0);
+        Position rookTo = kingSide ? Position(row, 5) : Position(row, 3);
+
+        Piece* rook = getPieceAt(rookFrom);
+        if (!rook || rook->getType() != PieceType::Rook) return false;
+
+        pieces[to.row][to.col] = piece;
+        piece->setPosition(to);
+        piece->setHasMoved(true);
+
+        pieces[from.row][from.col] = new EmptyPiece(from);
+
+        // move rook
+        pieces[rookTo.row][rookTo.col] = rook;
+        rook->setPosition(rookTo);
+        rook->setHasMoved(true);
+
+        pieces[rookFrom.row][rookFrom.col] = new EmptyPiece(rookFrom);
+
+        return true;
+    } 
+    else if (piece->getType() == PieceType::Pawn) {
+        int lastRank = (piece->getColour() == Colour::White ? 7 : 0);   // 2. promotion
+        if (to.row == lastRank) {
+            // Normal move first
+            Piece *targetPiece = getPieceAt(to);
+            pieces[to.row][to.col] = piece;
+            piece->setPosition(to);
+            piece->setHasMoved(true);
+            pieces[from.row][from.col] = new EmptyPiece(from);
+            delete targetPiece;
+
+            // Replace with promoted piece
+            char choice = pendingPromotionChoice; // set by HumanPlayer
+            Piece* promotedPiece = nullptr;
+            switch (choice) {
+                case 'R': promotedPiece = new Rook(piece->getColour(), to); break;
+                case 'B': promotedPiece = new Bishop(piece->getColour(), to); break;
+                case 'N': promotedPiece = new Knight(piece->getColour(), to); break;
+                default:  promotedPiece = new Queen(piece->getColour(), to); break;
+            }
+
+            delete piece; // remove pawn
+            pieces[to.row][to.col] = promotedPiece;
+            return true;
+        }
+        // 3. en passent
+        if (from.col == to.col) return false;           // not a diagonal move, so no en passant
+
+        Piece* target = getPieceAt(to);
+        if (target && target->getType() != PieceType::None) return false; // not empty = not enpassant
+
+        int capturedRow = (piece->getColour() == Colour::White) ? to.row - 1 : to.row + 1;
+        Position capturedPawnPos(capturedRow, to.col);
+        Piece* capturedPawn = getPieceAt(capturedPawnPos);
+
+        if (!capturedPawn || capturedPawn->getType() != PieceType::Pawn) return false;
+
+        // Perform en passant capture
+        delete capturedPawn;
+        pieces[capturedPawnPos.row][capturedPawnPos.col] = new EmptyPiece(capturedPawnPos);
+
+        pieces[to.row][to.col] = piece;
+        piece->setPosition(to);
+        piece->setHasMoved(true);
+
+        pieces[from.row][from.col] = new EmptyPiece(from);
+
+        return true;
+    }
+
+    return false; 
 }
 
 
@@ -132,7 +260,76 @@ bool Board::canMove(Piece& p) {
     return !validMoves.empty();
 }
 
-// squares being attacked by c
+
+// Placement Validation methods (see .h for documentation)
+
+void Board::placePiece(char pieceSymbol, Position pos) {
+    // Delete whatever is currently there
+    if (pieces[pos.row][pos.col]) {
+        delete pieces[pos.row][pos.col];
+    }
+
+    Colour colour = isupper(pieceSymbol) ? Colour::White : Colour::Black;
+    char lower = tolower(pieceSymbol);
+
+    Piece* newPiece = nullptr;
+    switch (lower) {
+        case 'k': newPiece = new King(colour, pos); break;
+        case 'q': newPiece = new Queen(colour, pos); break;
+        case 'r': newPiece = new Rook(colour, pos); break;
+        case 'b': newPiece = new Bishop(colour, pos); break;
+        case 'n': newPiece = new Knight(colour, pos); break;
+        case 'p': newPiece = new Pawn(colour, pos); break;
+        default: newPiece = new EmptyPiece(pos); break; 
+    }
+
+    pieces[pos.row][pos.col] = newPiece;
+}
+
+
+void Board::removePiece(Position pos) {
+    if (pieces[pos.row][pos.col]) {
+        delete pieces[pos.row][pos.col];
+    }
+    pieces[pos.row][pos.col] = new EmptyPiece(pos);
+}
+
+
+bool Board::validateSetup() const {
+    int whiteKingCount = 0;
+    int blackKingCount = 0;
+
+    for (int r = 0; r < 8; r++) {
+        for (int c = 0; c < 8; c++) {
+            Piece* p = pieces[r][c];
+            if (!p) continue;
+
+            if (p->getType() == PieceType::King) {
+                if (p->getColour() == Colour::White) whiteKingCount++;
+                else if (p->getColour() == Colour::Black) blackKingCount++;
+            }
+
+            if (p->getType() == PieceType::Pawn && (r == 0 || r == 7)) {
+                return false;
+            }
+        }
+    }
+
+    if (whiteKingCount != 1 || blackKingCount != 1) {
+        return false;
+    }
+
+    // Cannot start with either king in check
+    if (isInCheck(Colour::White) || isInCheck(Colour::Black)) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// Attacking Logic and Handling methods (see .h for documentation)
+
 std::vector<Position> Board::squaresBeingAttackedBy(Colour c) const {
     std::vector<Position> attackedSquares;
     for (int i = 0; i < 8; ++i) {
@@ -178,16 +375,41 @@ bool Board::isInCheck(Colour c) const {
 
 
 bool Board::isCheckMate(Colour c) {
-    // Check if the player has any valid moves left
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
-            Piece* piece = pieces[i][j];
-            if (piece && piece->getColour() == c) {
-                if (canMove(*piece)) {
-                    return false; // Found a valid move, not checkmate
-                }
-            }
+    if (!isInCheck(c)) return false;
+
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            Piece* p = pieces[row][col];
+            if (!p || p->getColour() != c) continue;
+
+            std::vector<Position> moves = p->getValidMoves(*this);
+
+            if (!moves.empty()) return false; // found at least 1 legal move
         }
     }
+
     return true; // No valid moves left, it's checkmate
+}
+
+
+// Getters for the last move (see .h for documentation)
+
+Position Board::getLastMoveFrom() const { 
+    return lastMoveFrom; 
+}
+
+
+Position Board::getLastMoveTo() const {
+    return lastMoveTo; 
+}
+
+
+PieceType Board::getLastMovePieceType() const {
+    return lastMovePieceType; 
+}
+
+
+// Setter
+void Board::setPendingPromotion(char p) { 
+    pendingPromotionChoice = p; 
 }

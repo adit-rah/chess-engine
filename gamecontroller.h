@@ -8,11 +8,19 @@
 #include <string>
 
 class GameController {
-    Board *board;                   // Owns the chess board
-    Player *players[2];             // Two players (could be Human or Computer)
-    Colour turn;                    // Whose turn is it? White/Black
-    std::vector<Display*> displays; // Attached displays (Text/Graphical)
-    bool isGameRunning = false;
+    Board *board;                       // Owns the chess board
+    Player *players[2];                 // Two players (could be Human or Computer)
+    Colour turn;                        // Whose turn is it? White/Black
+    std::vector<Display*> displays;     // Attached displays (Text/Graphical)
+    
+    bool isGameRunning = false;         // flags
+    bool inSetupMode = false;
+
+    // Command Handling
+    void handleSetupCommand(const std::string &action, std::istringstream &iss);
+    void handleNormalCommand(const std::string &action, std::istringstream &iss);
+    void cmdGame(std::istringstream &iss);
+    void cmdResign();
 
 public:
     GameController();
@@ -25,13 +33,12 @@ public:
     Player* createPlayerFromString(const std::string& type, Colour c);
 
     // Main game loop helpers
-    void processCommand(const std::string& cmd);   // For user commands
+    void processCommand(const std::string &cmd);
     void nextTurn();                               // Switch to the other player
-    bool checkGameState();                         // Detect check, checkmate, stalemate
+    bool checkGameState();                         // Detect check, checkmate, stalemate;
 
     // Utility
     Colour getCurrentTurn() const;
-    Player* getCurrentPlayer();
     Board& getBoard();
 };
 

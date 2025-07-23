@@ -20,9 +20,11 @@ int main() {
     std::string cmd;
     while (true) {
         std::cout << "> ";
+        std::string cmd;
         if (!std::getline(std::cin, cmd)) break; // EOF exits
-        if (cmd == "quit" || cmd == "exit") break;
+        if (cmd.empty()) continue;               // <-- ignore empty lines
 
+        if (cmd == "quit" || cmd == "exit") break;
         game.processCommand(cmd);
     }
 

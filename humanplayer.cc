@@ -11,42 +11,34 @@ static Position parseAlgebraic(const std::string &sq) {
     return Position(row, col);
 }
 
-bool HumanPlayer::makeMove(Board &board) {
-    std::cout << (getColour() == Colour::White ? "White" : "Black") 
-              << "'s move: ";
-
-    std::string fromSq, toSq;
-    std::cin >> fromSq >> toSq;
+bool HumanPlayer::makeMove(Board &board, std::istringstream &iss) {
+    std::string fromSq, toSq, promotionChoice;
+    iss >> fromSq >> toSq;
 
     if (fromSq.empty() || toSq.empty()) {
-        std::cout << "Invalid input. Try again.\n";
+        std::cout << "Invalid input.\n";
         return false;
     }
 
+    if (iss.peek() != '\n') {
+        iss >> promotionChoice;
+    }
+
     Position from = parseAlgebraic(fromSq);
-    Position to   = parseAlgebraic(toSq);
+    Position to = parseAlgebraic(toSq);
 
     Piece* piece = board.getPieceAt(from);
     if (!piece) {
         std::cout << "No piece at " << fromSq << "\n";
         return false;
     }
-
-    if (piece->getColour() != getColour()) {
+    if (piece->getColour() != colour) {
         std::cout << "That’s not your piece!\n";
         return false;
     }
 
-    if (!board.validMove(from, to)) {
-        std::cout << "Invalid move!\n";
-        return false;
-    }
+    board.setPendingPromotion(promotionChoice.empty() ? 'Q' : promotionChoice[0]);
 
-    if (!board.movePiece(from, to)) {
-        std::cout << "Move failed.\n";
-        return false;
-    }
-
-    // If move succeeded, return true
-    return true;
+    return board.movePiece(from, to);
 }
+
