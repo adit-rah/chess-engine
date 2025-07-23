@@ -1,6 +1,8 @@
 #include "gamecontroller.h"
 #include "humanplayer.h"
 #include "ailevel1.h"
+#include "ailevel2.h"
+#include "ailevel3.h"
 #include <sstream>
 #include <iostream>
 
@@ -58,8 +60,12 @@ void GameController::startGame(Player* white, Player* black) {
 Player* GameController::createPlayerFromString(const std::string& type, Colour c) {
     if (type == "human") {
         return new HumanPlayer(c);
-    } else if (type.find("computer") == 0) {
-        // :p
+    } else if (type == "computer1") {
+        return new AILevel1(c); 
+    } else if (type == "computer2") {
+        return new AILevel2(c); 
+    } else if (type == "computer3") {
+        return new AILevel3(c); 
     }
     return nullptr;
 }

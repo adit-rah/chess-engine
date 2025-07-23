@@ -22,6 +22,68 @@ Board::Board() {
     }
 }
 
+Board::Board(const Board& other) {
+    // Allocate memory for pieces array (same as default constructor)
+    pieces = new Piece**[8];
+    for (int i = 0; i < 8; ++i) {
+        pieces[i] = new Piece*[8];
+        for (int j = 0; j < 8; ++j) {
+            pieces[i][j] = nullptr;
+        }
+    }
+
+    // Copy all pieces deeply
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            Piece* p = other.pieces[r][c];
+            // Delete existing piece in destination if any
+            if (pieces[r][c]) {
+                delete pieces[r][c];
+                pieces[r][c] = nullptr;
+            }
+
+            if (!p) {
+                pieces[r][c] = nullptr;
+                continue;
+            }
+
+            // Create a new piece of the same dynamic type
+            switch (p->getType()) {
+                case PieceType::Pawn:
+                    pieces[r][c] = new Pawn(p->getColour(), Position(r, c));
+                    break;
+                case PieceType::Rook:
+                    pieces[r][c] = new Rook(p->getColour(), Position(r, c));
+                    break;
+                case PieceType::Knight:
+                    pieces[r][c] = new Knight(p->getColour(), Position(r, c));
+                    break;
+                case PieceType::Bishop:
+                    pieces[r][c] = new Bishop(p->getColour(), Position(r, c));
+                    break;
+                case PieceType::Queen:
+                    pieces[r][c] = new Queen(p->getColour(), Position(r, c));
+                    break;
+                case PieceType::King:
+                    pieces[r][c] = new King(p->getColour(), Position(r, c));
+                    break;
+                case PieceType::None:
+                    pieces[r][c] = new EmptyPiece(Position(r, c));
+                    break;
+            }
+            // Copy hasMoved status if needed (add a getter if you don't have one)
+            pieces[r][c]->setHasMoved(p->getHasMoved());
+        }
+    }
+
+    // Copy any other Board member variables (like lastMoveFrom, pendingPromotionChoice, etc)
+    lastMoveFrom = other.lastMoveFrom;
+    lastMoveTo = other.lastMoveTo;
+    lastMovePieceType = other.lastMovePieceType;
+    pendingPromotionChoice = other.pendingPromotionChoice;
+}
+
+
 Board::~Board() {
     for (int i = 0; i < 8; ++i) {
         delete pieces[i];
@@ -262,6 +324,21 @@ bool Board::canMove(Piece& p) {
 
 
 // Placement Validation methods (see .h for documentation)
+
+void Board::setPieceAt(Position pos, Piece* piece) {
+    // First delete any existing piece at that square
+    Piece* existing = pieces[pos.row][pos.col];
+    if (existing) delete existing;
+
+    // Place the new piece
+    pieces[pos.row][pos.col] = piece;
+
+    // Also update the piece’s internal position
+    if (piece) {
+        piece->setPosition(pos);
+    }
+}
+
 
 void Board::placePiece(char pieceSymbol, Position pos) {
     // Delete whatever is currently there

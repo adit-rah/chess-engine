@@ -7,6 +7,7 @@ class AILevel3 : public ComputerPlayer {
 public:
     AILevel3(Colour c) : ComputerPlayer(c) {}
     
+    std::vector<Position> determineNextBestMove(Board &b) override;
 };
 
 #endif

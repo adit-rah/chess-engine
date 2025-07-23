@@ -25,6 +25,8 @@ int getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
 }
 
 std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
+    static PRNG prng;                              // remember you did this earlier (adit/ just in case)
+
     std::vector<ScoredPosition> scoredMoves;
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
     // store all squares currently being attacked by the opponent
@@ -42,7 +44,7 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
                     Piece* target = b.getPieceAt(to);
                     // Add points for capturing
                     if (target && target->getColour() == oppColour) {
-                        move_points += target.getValue(); // increase value for capturing an opponent's piece
+                        move_points += target->getValue(); // increase value for capturing an opponent's piece
                         // if piece is defended, avoid capturing it unless it unless it is a favourable trade
                             lowestAttackerValue = getLowestAttackerValue(b, oppColour, to);
                             if (lowestAttackerValue > 0) {
@@ -91,7 +93,5 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
     // Pick one at random if there are multiple
     int idx = prng(0, bestMoves.size() - 1);
     return {bestMoves[idx].from, bestMoves[idx].to};
-
-    
-            }
+}
 
