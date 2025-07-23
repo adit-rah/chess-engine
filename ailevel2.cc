@@ -1,11 +1,14 @@
 #include "ailevel2.h"
 #include "scoredposition.h"
+#include "PRNG.h"
 #include <vector>
 #include <algorithm>
 
 // Assumes ScoredPosition has: Position from, Position to, int score
 
 std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
+    static PRNG prng;                              // remember you did this earlier (adit/ just in case)
+    
     std::vector<ScoredPosition> scoredMoves;
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
 
@@ -19,20 +22,20 @@ std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
                     Piece* target = b.getPieceAt(to);
                     // Add points for capturing
                     if (target && target->getColour() == oppColour) {
-                        move_points += target.getValue(); // 1 point for capturing an opponent's piece
+                        move_points += target->getValue(); // 1 point for capturing an opponent's piece
                     }
-                    // Add points for putting opponent in check
-                    Piece* original = b.getPieceAt(to);
-                    b.movePiece(Position(row, col), to);
-                    if (b.isChckMate){
+                    
+                    // Make a copy of the board
+                    Board tempBoard(b);
+                    // Apply the move on the copy
+                    tempBoard.movePiece(Position(row, col), to);
+
+                    if (tempBoard.isCheckMate(oppColour)){
                         move_points = 1000; // 1000 points for checkmate
                     } 
-                    else if (b.isInCheck(oppColour)) {
-                        move_points += 5; // 1  point for putting opponent in check
-                    }
-                    // Undo the move
-                    b.movePiece(to, Position(row, col));
-                    b.setPieceAt(to, original);
+                    if (tempBoard.isInCheck(oppColour)) {
+                        move_points += 5;   // 5 points for putting opponent in check
+                    } 
 
                     scoredMoves.emplace_back(Position(row, col), to, move_points);
                 }
@@ -63,6 +66,5 @@ std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
     int idx = prng(0, bestMoves.size() - 1);
     return {bestMoves[idx].from, bestMoves[idx].to};
 
-    
-            }
+}
 

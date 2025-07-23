@@ -15,6 +15,8 @@ class Board : public Subject {
 
 public:
     Board();
+    Board(const Board& other);
+
     ~Board();
     
     // You will notice that some methods that should be const aren't. The reason why
@@ -44,6 +46,8 @@ public:
 
     // placement validation ============
     
+    // sets that piece on that position
+    void setPieceAt(Position pos, Piece* piece);
     // places a piece based of the symbol at that position 
     void placePiece(char pieceSymbol, Position pos);
     // removes the piece at that position
