@@ -107,24 +107,74 @@ bool Board::movePiece(Position from, Position to) {
     if (!piece) return false;           // piece just doesn't exist, invalid move
 
     std::vector<Position> validMoves = piece->getValidMoves(*this);
-    for (Position move : validMoves){
-        if (move == to) {
-            Piece *targetPiece = getPieceAt(to);
 
-            // move the piece to the new position 
-            pieces[to.row][to.col] = piece;
-            piece->setPosition(Position(to.row, to.col));
-
-            // replace old position with empty piece
-            pieces[from.row][from.col] = new EmptyPiece(from);
-
-            // delete captured piece
-            delete targetPiece;
-
-            return true;
+    // checks if the move is valid
+    bool isValid = false;
+    for (auto &m : validMoves) {
+        if (m == to) { 
+            isValid = true;
+            break; 
         }
     }
-    return false; // Invalid move
+    if (!isValid) return false;
+
+    // then moves the piece if it does exist
+    if (handleSpecialMoves(from, to)) {
+        return true;
+    }
+
+    Piece *targetPiece = getPieceAt(to);
+    // move the piece to the new position 
+    pieces[to.row][to.col] = piece;
+    piece->setPosition(to);
+    piece->setHasMoved(true);
+
+    // replace old position with empty piece
+    pieces[from.row][from.col] = new EmptyPiece(from);
+
+    // delete captured piece
+    delete targetPiece;
+
+    return true;
+}
+
+
+bool Board::handleSpecialMoves(Position from, Position to) {
+    Piece* piece = getPieceAt(from);    // guard clause from earlier saves this
+    if (!piece) return false;           // but just in case ;)
+
+    if (piece->getType() == PieceType::King) {
+        // castling requires moving 2 columns
+        int colDiff = to.col - from.col;
+        if (std::abs(colDiff) != 2) return false;
+
+        int row = from.row;
+        
+        // determine rook side
+        bool kingSide = (colDiff > 0);
+
+        Position rookFrom = kingSide ? Position(row, 7) : Position(row, 0);
+        Position rookTo = kingSide ? Position(row, 5) : Position(row, 3);
+
+        Piece* rook = getPieceAt(rookFrom);
+        if (!rook || rook->getType() != PieceType::Rook) return false;
+
+        pieces[to.row][to.col] = piece;
+        piece->setPosition(to);
+        piece->setHasMoved(true);
+
+        pieces[from.row][from.col] = new EmptyPiece(from);
+
+        // move rook
+        pieces[rookTo.row][rookTo.col] = rook;
+        rook->setPosition(rookTo);
+        rook->setHasMoved(true);
+
+        pieces[rookFrom.row][rookFrom.col] = new EmptyPiece(rookFrom);
+
+        return true;
+    }
+    return false; 
 }
 
 
@@ -215,18 +265,6 @@ std::vector<Position> Board::squaresBeingAttackedBy(Colour c) const {
         }
     }
     return attackedSquares;
-}
-
-
-bool Board::isSquareAttacked(Position sq, Colour by) const {
-    std::vector<Position> attacked = squaresBeingAttackedBy(by);
-
-    for (const Position &p : attacked) {
-        if (p == sq) {
-            return true;
-        }
-    }
-    return false;
 }
 
 

@@ -32,6 +32,8 @@ public:
     bool isBoardLegalMove(Position from, Position to);
     // moves the piece, returns false if invalid move
     bool movePiece(Position from, Position to); 
+    // handles the board's special moves (castling, enpassent, promotions in this case)
+    bool handleSpecialMoves(Position from, Position to);
     // checks if a piece can move 
     bool canMove(Piece& p);
 
@@ -48,8 +50,6 @@ public:
     
     // returns all squares being attacked by the colour c
     std::vector<Position> squaresBeingAttackedBy(Colour c) const;
-    // checks if the square is being attacked by that colour
-    bool Board::isSquareAttacked(Position sq, Colour by) const; 
     // is the king in the line of sight of any enemy piece?
     bool isInCheck(Colour c) const;
     // are there any moves left?
