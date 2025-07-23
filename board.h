@@ -48,6 +48,8 @@ public:
     
     // returns all squares being attacked by the colour c
     std::vector<Position> squaresBeingAttackedBy(Colour c) const;
+    // checks if the square is being attacked by that colour
+    bool Board::isSquareAttacked(Position sq, Colour by) const; 
     // is the king in the line of sight of any enemy piece?
     bool isInCheck(Colour c) const;
     // are there any moves left?

@@ -218,6 +218,18 @@ std::vector<Position> Board::squaresBeingAttackedBy(Colour c) const {
 }
 
 
+bool Board::isSquareAttacked(Position sq, Colour by) const {
+    std::vector<Position> attacked = squaresBeingAttackedBy(by);
+
+    for (const Position &p : attacked) {
+        if (p == sq) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 Position Board::findKing(Colour c) const {
     for (int row = 0; row < 8; ++row) {
         for (int col = 0; col < 8; ++col) {
