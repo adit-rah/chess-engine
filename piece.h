@@ -1,8 +1,7 @@
 #ifndef PIECE_H
 #define PIECE_H
-#include <iostream>
-#include <vector>
 
+#include <vector>
 
 class Board; 
 

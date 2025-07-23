@@ -12,7 +12,7 @@ static Position parseAlgebraic(const std::string &sq) {
 }
 
 bool HumanPlayer::makeMove(Board &board, std::istringstream &iss) {
-    std::string fromSq, toSq;
+    std::string fromSq, toSq, promotionChoice;
     iss >> fromSq >> toSq;
 
     if (fromSq.empty() || toSq.empty()) {
@@ -20,8 +20,12 @@ bool HumanPlayer::makeMove(Board &board, std::istringstream &iss) {
         return false;
     }
 
+    if (iss.peek() != '\n') {
+        iss >> promotionChoice;
+    }
+
     Position from = parseAlgebraic(fromSq);
-    Position to   = parseAlgebraic(toSq);
+    Position to = parseAlgebraic(toSq);
 
     Piece* piece = board.getPieceAt(from);
     if (!piece) {
@@ -33,10 +37,8 @@ bool HumanPlayer::makeMove(Board &board, std::istringstream &iss) {
         return false;
     }
 
-    if (!board.movePiece(from, to)) {
-        return false;
-    }
+    board.setPendingPromotion(promotionChoice.empty() ? 'Q' : promotionChoice[0]);
 
-    return true;
+    return board.movePiece(from, to);
 }
 

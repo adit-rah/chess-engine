@@ -1,6 +1,7 @@
 #include "pawn.h"
 #include "board.h"
 
+#include <iostream>
 
 Pawn::Pawn(Colour colour, Position pos)
     : Piece(1, PieceType::Pawn, colour, pos) {} // value = 1 for pawn
@@ -52,6 +53,7 @@ std::vector<Position> Pawn::getRawMoves(const Board &b) {
 std::vector<Position> Pawn::getValidMoves(Board &b) {
     std::vector<Position> rawMoves = getRawMoves(b);
     Position current = getPosition();
+    Colour myColour = getColour();
     std::vector<Position> moves;
 
     for (const Position& move : rawMoves) {
@@ -59,5 +61,25 @@ std::vector<Position> Pawn::getValidMoves(Board &b) {
             moves.push_back(move);
         }
     }
+
+    Position lastFrom = b.getLastMoveFrom();
+    Position lastTo = b.getLastMoveTo();
+    PieceType lastType = b.getLastMovePieceType();
+
+    if (lastType == PieceType::Pawn) {
+        int diffRows = std::abs(lastTo.row - lastFrom.row);
+        bool doubleStep = (diffRows == 2);
+        bool sameRow = (lastTo.row == current.row);
+        bool adjacentCol = (std::abs(lastTo.col - current.col) == 1);
+
+        if (doubleStep && sameRow && adjacentCol) {
+            int dir = (myColour == Colour::White) ? 1 : -1;
+            Position enPassantCapture(lastTo.row + dir, lastTo.col);
+            if (b.isBoardLegalMove(current, enPassantCapture)) {
+                moves.push_back(enPassantCapture);
+            }
+        }
+    }
+
     return moves;
 }
