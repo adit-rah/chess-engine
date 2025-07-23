@@ -52,18 +52,18 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
                             
                         }
                     }
-                    // Add points for putting opponent in check
-                    Piece* original = b.getPieceAt(to);
-                    b.movePiece(from, to);
-                    if (b.isCheckMate(oppColour)){
+                    
+                    // Make a copy of the board
+                    Board tempBoard(b);
+                    // Apply the move on the copy
+                    tempBoard.movePiece(Position(row, col), to);
+
+                    if (tempBoard.isCheckMate(oppColour)){
                         move_points = 1000; // gain 1000 points to never miss checkmate
                     } 
-                    else if (b.isInCheck(oppColour)) {
-                        move_points += 5; // 1  point for putting opponent in check
+                    else if (tempBoard.isInCheck(oppColour)) {
+                        move_points += 5;   // 5 points for putting opponent in check
                     }
-                    // Undo the move
-                    b.movePiece(to, from);
-                    b.setPieceAt(to, original);
 
                     scoredMoves.emplace_back(from, to, move_points);
                 }

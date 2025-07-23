@@ -4,9 +4,6 @@
 #include <vector>
 #include <algorithm>
 
-#include <iostream>
-
-
 // Assumes ScoredPosition has: Position from, Position to, int score
 
 std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
@@ -33,10 +30,10 @@ std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
                     // Apply the move on the copy
                     tempBoard.movePiece(Position(row, col), to);
 
-                    if (b.isCheckMate(oppColour)){
+                    if (tempBoard.isCheckMate(oppColour)){
                         move_points = 1000; // 1000 points for checkmate
                     } 
-                    if (b.isInCheck(oppColour)) {
+                    if (tempBoard.isInCheck(oppColour)) {
                         move_points += 5;   // 5 points for putting opponent in check
                     } 
 
@@ -69,6 +66,5 @@ std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
     int idx = prng(0, bestMoves.size() - 1);
     return {bestMoves[idx].from, bestMoves[idx].to};
 
-    
-            }
+}
 
