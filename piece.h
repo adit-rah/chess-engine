@@ -1,8 +1,7 @@
 #ifndef PIECE_H
 #define PIECE_H
-#include <iostream>
-#include <vector>
 
+#include <vector>
 
 class Board; 
 
@@ -22,6 +21,7 @@ class Piece {
     PieceType type;
     Colour colour;
     Position pos;
+    bool hasMoved = false;
 
     public:
         Piece();
@@ -35,6 +35,8 @@ class Piece {
         void setPosition(Position p);
         char getSymbol();
         PieceType getType();
+        void setHasMoved(bool moved) { hasMoved = moved; } // i should probably move these to the
+        bool getHasMoved() const { return hasMoved; }       // implementation file
         
         // abstract method(s)
         // slightly misleading since it still prunes moves out based on "visibility"

@@ -7,6 +7,11 @@
 class Board : public Subject {
     Piece ***pieces;    // "triple pointer AHH", no it's not that bad.
                         // It's just a 2-D array (chess board; the first two *) of Piece pointers
+    
+    Position lastMoveFrom;          // tracking last move will probably be useful for more
+    Position lastMoveTo;            // than just enpassent, so don't doubt it's existence
+    PieceType lastMovePieceType;
+    char pendingPromotionChoice = 'Q';  // next pawn promoted turns into this
 
 public:
     Board();
@@ -32,6 +37,8 @@ public:
     bool isBoardLegalMove(Position from, Position to);
     // moves the piece, returns false if invalid move
     bool movePiece(Position from, Position to); 
+    // handles the board's special moves (castling, enpassent, promotions in this case)
+    bool handleSpecialMoves(Position from, Position to);
     // checks if a piece can move 
     bool canMove(Piece& p);
 
@@ -54,6 +61,18 @@ public:
     bool isCheckMate(Colour c);
     // finds the kings position on the board
     Position findKing(Colour c) const;
+
+    // getters for the last move ========
+
+    // returns the starting position of the last move
+    Position getLastMoveFrom() const;
+    // returns the starting position of the last move
+    Position getLastMoveTo() const;
+    // returns the type of the piece that moved last
+    PieceType getLastMovePieceType() const;
+
+    // setter for the promotion ========
+    void setPendingPromotion(char p);
 };
 
 #endif

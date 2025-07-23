@@ -8,6 +8,8 @@
 #include "queen.h"
 #include "king.h"
 
+#include <iostream> // this is no joke for tolower and toupper
+
 
 // Constructor/Destructor 
 Board::Board() {
@@ -107,24 +109,127 @@ bool Board::movePiece(Position from, Position to) {
     if (!piece) return false;           // piece just doesn't exist, invalid move
 
     std::vector<Position> validMoves = piece->getValidMoves(*this);
-    for (Position move : validMoves){
-        if (move == to) {
-            Piece *targetPiece = getPieceAt(to);
 
-            // move the piece to the new position 
-            pieces[to.row][to.col] = piece;
-            piece->setPosition(Position(to.row, to.col));
-
-            // replace old position with empty piece
-            pieces[from.row][from.col] = new EmptyPiece(from);
-
-            // delete captured piece
-            delete targetPiece;
-
-            return true;
+    // checks if the move is valid
+    bool isValid = false;
+    for (auto &m : validMoves) {
+        if (m == to) { 
+            isValid = true;
+            break; 
         }
     }
-    return false; // Invalid move
+    if (!isValid) return false;
+
+    lastMoveFrom = from;
+    lastMoveTo = to;
+    lastMovePieceType = piece->getType();
+    // then moves the piece if it does exist
+    if (handleSpecialMoves(from, to)) {
+        return true;
+    }
+
+    Piece *targetPiece = getPieceAt(to);
+    // move the piece to the new position 
+    pieces[to.row][to.col] = piece;
+    piece->setPosition(to);
+    piece->setHasMoved(true);
+
+    // replace old position with empty piece
+    pieces[from.row][from.col] = new EmptyPiece(from);
+
+    // delete captured piece
+    delete targetPiece;
+
+    return true;
+}
+
+
+bool Board::handleSpecialMoves(Position from, Position to) {
+    Piece* piece = getPieceAt(from);    // guard clause from earlier saves this
+    if (!piece) return false;           // but just in case ;)
+
+    if (piece->getType() == PieceType::King) { // 1. castling
+        // castling requires moving 2 columns
+        int colDiff = to.col - from.col;
+        if (std::abs(colDiff) != 2) return false;
+
+        int row = from.row;
+
+        // determine rook side
+        bool kingSide = (colDiff > 0);
+
+        Position rookFrom = kingSide ? Position(row, 7) : Position(row, 0);
+        Position rookTo = kingSide ? Position(row, 5) : Position(row, 3);
+
+        Piece* rook = getPieceAt(rookFrom);
+        if (!rook || rook->getType() != PieceType::Rook) return false;
+
+        pieces[to.row][to.col] = piece;
+        piece->setPosition(to);
+        piece->setHasMoved(true);
+
+        pieces[from.row][from.col] = new EmptyPiece(from);
+
+        // move rook
+        pieces[rookTo.row][rookTo.col] = rook;
+        rook->setPosition(rookTo);
+        rook->setHasMoved(true);
+
+        pieces[rookFrom.row][rookFrom.col] = new EmptyPiece(rookFrom);
+
+        return true;
+    } 
+    else if (piece->getType() == PieceType::Pawn) {
+        int lastRank = (piece->getColour() == Colour::White ? 7 : 0);   // 2. promotion
+        if (to.row == lastRank) {
+            // Normal move first
+            Piece *targetPiece = getPieceAt(to);
+            pieces[to.row][to.col] = piece;
+            piece->setPosition(to);
+            piece->setHasMoved(true);
+            pieces[from.row][from.col] = new EmptyPiece(from);
+            delete targetPiece;
+
+            // Replace with promoted piece
+            char choice = pendingPromotionChoice; // set by HumanPlayer
+            Piece* promotedPiece = nullptr;
+            switch (choice) {
+                case 'R': promotedPiece = new Rook(piece->getColour(), to); break;
+                case 'B': promotedPiece = new Bishop(piece->getColour(), to); break;
+                case 'N': promotedPiece = new Knight(piece->getColour(), to); break;
+                default:  promotedPiece = new Queen(piece->getColour(), to); break;
+            }
+
+            delete piece; // remove pawn
+            pieces[to.row][to.col] = promotedPiece;
+            return true;
+        }
+        // 3. en passent
+        if (from.col == to.col) return false;           // not a diagonal move, so no en passant
+
+        Piece* target = getPieceAt(to);
+        if (target && target->getType() != PieceType::None) return false; // not empty = not enpassant
+
+        int capturedRow = (piece->getColour() == Colour::White) ? to.row - 1 : to.row + 1;
+        Position capturedPawnPos(capturedRow, to.col);
+        Piece* capturedPawn = getPieceAt(capturedPawnPos);
+
+        if (!capturedPawn || capturedPawn->getType() != PieceType::Pawn) return false;
+
+        // Perform en passant capture
+        delete capturedPawn;
+        pieces[capturedPawnPos.row][capturedPawnPos.col] = new EmptyPiece(capturedPawnPos);
+
+        pieces[to.row][to.col] = piece;
+        piece->setPosition(to);
+        piece->setHasMoved(true);
+
+        pieces[from.row][from.col] = new EmptyPiece(from);
+
+        return true;
+    }
+
+    return false; 
 }
 
 
@@ -260,4 +365,27 @@ bool Board::isCheckMate(Colour c) {
         }
     }
     return true; // No valid moves left, it's checkmate
+}
+
+
+// Getters for the last move (see .h for documentation)
+
+Position Board::getLastMoveFrom() const { 
+    return lastMoveFrom; 
+}
+
+
+Position Board::getLastMoveTo() const {
+    return lastMoveTo; 
+}
+
+
+PieceType Board::getLastMovePieceType() const {
+    return lastMovePieceType; 
+}
+
+
+// Setter
+void Board::setPendingPromotion(char p) { 
+    pendingPromotionChoice = p; 
 }
