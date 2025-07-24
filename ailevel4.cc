@@ -4,24 +4,26 @@
 #include <algorithm>
 #include <iostream>
 
-// helper function to find the least vauable attacker of a square
-int AILevel4::getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
-    int lowestValue = 100; // set to a high value, since no piece can have a value higher than 10
-    for (int row = 0; row < 8; row ++){
-        for (int col = 0; col < 8; col++){
+// helper function to find the least vauable attacker of a square, with the option of excluding a specific position
+int AILevel4::getLowestAttackerValue(Board &b, Colour oppColour, Position pos, Position exclude ) {
+     int lowestValue = 100;
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
             Position attackerPos(row, col);
+
+            // Exclude a specific position (like the one we're moving from)
+            if (attackerPos == exclude) continue;
+
             Piece* attacker = b.getPieceAt(attackerPos);
-            if (attacker && attacker->getColour() == oppColour) {
+            if (attacker && attacker->getColour() == colour) {
                 std::vector<Position> validMoves = attacker->getValidMoves(b);
                 if (std::find(validMoves.begin(), validMoves.end(), pos) != validMoves.end()) {
-                    // update lowest value if the current attacker is less valuable
-                    lowestValue = (lowestValue > attacker->getValue()) ?
-                                   attacker->getValue() : lowestValue;
+                    lowestValue = std::min(lowestValue, attacker->getValue());
                 }
             }
         }
     }
-    return lowestValue == 100 ? 0 : lowestValue; // if no attacker found, return 0
+    return (lowestValue == 100) ? 0 : lowestValue; // if no attacker found return 0
 }
 
 
@@ -81,10 +83,17 @@ std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
                     }
                     Piece* target = b.getPieceAt(to);
                     if (target && target->getColour() == oppColour) {
-                        move_points += target->getValue();
                         int lowestOpponentDefender = getLowestAttackerValue(b, oppColour, to);
-                        if (lowestOpponentDefender > 0) {
-                            move_points -= target->getValue();
+                        int lowestOurSupport = getLowestAttackerValue(b, colour, to, from);
+                        bool targetIsDefended = (lowestOpponentDefender > 0);
+                        bool weAreSupported = (lowestOurSupport > 0);
+
+                        if (!targetIsDefended || (target->getValue() > piece->getValue())) {
+                            move_points += target->getValue(); // capture
+                        } else if (targetIsDefended && weAreSupported) {
+                            move_points += target->getValue() - piece->getValue();
+                        } else {
+                            move_points -= piece->getValue(); // risky trade
                         }
                     }
                     // Simulate the move
@@ -93,7 +102,7 @@ std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
                     if (tempBoard.isCheckMate(oppColour)) {
                         move_points = 1000;
                     } else if (tempBoard.isInCheck(oppColour)) {
-                        move_points += 5;
+                        move_points += 2; // 2 points for putting opponent in check
                     }
                     // Now, check the opponent's best reply
                     int opponentBest = evaluateOpponentBestMove(tempBoard, oppColour);

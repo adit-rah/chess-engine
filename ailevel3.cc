@@ -7,23 +7,25 @@
 using namespace std;
 // helper function to find the least vauable attacker of a square
 // ADD TO .H AFTER
-int getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
-    int lowestValue = 100; // set to a high value, since no piece can have a value higher than 10
-    for (int row = 0; row < 8; row ++){
-        for (int col = 0; col < 8; col++){
+int getLowestAttackerValue(Board &b, Colour oppColour, Position pos, Position exclude ) {
+     int lowestValue = 100;
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
             Position attackerPos(row, col);
+
+            // Exclude a specific position (like the one we're moving from)
+            if (attackerPos == exclude) continue;
+
             Piece* attacker = b.getPieceAt(attackerPos);
-            if (attacker && attacker->getColour() == oppColour) {
+            if (attacker && attacker->getColour() == colour) {
                 std::vector<Position> validMoves = attacker->getValidMoves(b);
                 if (std::find(validMoves.begin(), validMoves.end(), pos) != validMoves.end()) {
-                    // update lowest value if the current attacker is less valuable
-                    lowestValue = (lowestValue > attacker->getValue()) ?
-                                   attacker->getValue() : lowestValue;
+                    lowestValue = std::min(lowestValue, attacker->getValue());
                 }
             }
         }
     }
-    return lowestValue == 100 ? 0 : lowestValue; // if no attacker found, return 0
+    return (lowestValue == 100) ? 0 : lowestValue; // if no attacker found return 0
 }
 
 std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
@@ -49,12 +51,17 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
                     Piece* target = b.getPieceAt(to);
                     // Add points for capturing
                     if (target && target->getColour() == oppColour) {
-                        move_points += target->getValue(); // increase value for capturing an opponent's piece
-                        // if piece is defended, avoid capturing it unless it unless it is a favourable trade
-                            lowestAttackerValue = getLowestAttackerValue(b, oppColour, to);
-                            if (lowestAttackerValue > 0) {
-                                move_points -= target->getValue() - 1; // account for a trade from opponent
-                            
+                        int lowestOpponentDefender = getLowestAttackerValue(b, oppColour, to);
+                        int lowestOurSupport = getLowestAttackerValue(b, colour, to, from);
+                        bool targetIsDefended = (lowestOpponentDefender > 0);
+                        bool weAreSupported = (lowestOurSupport > 0);
+
+                        if (!targetIsDefended || (target->getValue() > piece->getValue())) {
+                            move_points += target->getValue(); // capture
+                        } else if (targetIsDefended && weAreSupported) {
+                            move_points += target->getValue() - piece->getValue();
+                        } else {
+                            move_points -= piece->getValue(); // risky trade
                         }
                     }
                     
@@ -67,27 +74,9 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
                         move_points = 1000; // gain 1000 points to never miss checkmate
                     } 
                     else if (tempBoard.isInCheck(oppColour)) {
-                        move_points += 5;   // 5 points for putting opponent in check
+                        move_points += 2;   // 2 points for putting opponent in check
                     }
-                    if (piece->getType() == PieceType::Pawn) {
-                        // Central pawn advance bonus
-                        if ((to.col == 3 || to.col == 4) && (to.row == 3 || to.row == 4)) {
-                            move_points += 2;
-                        }
-                     }
 
-                    if (move_points == 0) {
-                        // Bonus for central control
-                        if ((to.row == 3 || to.row == 4) && (to.col == 3 || to.col == 4)) {
-                            move_points += 1;
-                        }
-                        if (piece->getType() != PieceType::Pawn && from.row == (colour == Colour::White ? 7 : 0)) {
-                            move_points += 1; // encourage development
-                        }
-                        else if (piece->getType() == PieceType::Pawn){
-                            move_points += 1;
-                        }
-                    }
                     
 
                     scoredMoves.emplace_back(from, to, move_points);
