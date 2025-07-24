@@ -5,7 +5,7 @@
 
 // helper function to find the least vauable attacker of a square
 // ADD TO .H AFTER
-int getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
+static int getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
     int lowestValue = 100; // set to a high value, since no piece can have a value higher than 10
     for (int row = 0; row < 8; row ++){
         for (int col = 0; col < 8; col++){

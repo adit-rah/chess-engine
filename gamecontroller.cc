@@ -3,6 +3,7 @@
 #include "ailevel1.h"
 #include "ailevel2.h"
 #include "ailevel3.h"
+#include "ailevel4.h"
 #include <sstream>
 #include <iostream>
 
@@ -66,6 +67,8 @@ Player* GameController::createPlayerFromString(const std::string& type, Colour c
         return new AILevel2(c); 
     } else if (type == "computer3") {
         return new AILevel3(c); 
+    } else if (type == "computer4") {
+        return new AILevel4(c); 
     }
     return nullptr;
 }
