@@ -66,6 +66,7 @@ int evaluateOpponentBestMove(Board &b, Colour oppColour, int count = 2) {
 
 std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
     static PRNG prng;
+
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
     std::vector<ScoredPosition> scoredMoves;
 
