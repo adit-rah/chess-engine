@@ -2,10 +2,10 @@
 #include "scoredposition.h"
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 // helper function to find the least vauable attacker of a square
-// ADD TO .H AFTER
-int getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
+int AILevel4::getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
     int lowestValue = 100; // set to a high value, since no piece can have a value higher than 10
     for (int row = 0; row < 8; row ++){
         for (int col = 0; col < 8; col++){
@@ -26,7 +26,7 @@ int getLowestAttackerValue(Board &b, Colour oppColour, Position pos ){
 
 
 // Helper function to evaluate the best score the opponent can achieve after a move
-int evaluateOpponentBestMove(Board &b, Colour oppColour, int count = 3) {
+int evaluateOpponentBestMove(Board &b, Colour oppColour, int count = 2) {
     if (count == 0) {
         return 0; // base case, static evaluation
     }
@@ -49,11 +49,11 @@ int evaluateOpponentBestMove(Board &b, Colour oppColour, int count = 3) {
                     if (tempBoard.isCheckMate(myColour)) {
                         move_points += 1000;
                     } else if (tempBoard.isInCheck(myColour)) {
-                        move_points += 5;
+                        move_points += 1;
                     }
                     // Recursively evaluate the next move for the other player
-                    int replyScore = evaluateOpponentBestMove(tempBoard, myColour, count - 1);
-                    int totalScore = move_points - replyScore;
+                    int replyScore = -evaluateOpponentBestMove(tempBoard, myColour, count - 1);
+                    int totalScore = move_points + replyScore;
                     if (totalScore > bestScore) bestScore = totalScore; // update best score
                 }
             }
@@ -75,7 +75,10 @@ std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
             if (piece && piece->getColour() == colour) {
                 std::vector<Position> moves = piece->getValidMoves(b);
                 for (Position to : moves) {
-                    int move_points = piece->getValue() - lowestAttackerValue;
+                    int move_points = 0;
+                    if (lowestAttackerValue > 0) {
+                        move_points = piece->getValue() - lowestAttackerValue; // tracks how important it is to move piece
+                    }
                     Piece* target = b.getPieceAt(to);
                     if (target && target->getColour() == oppColour) {
                         move_points += target->getValue();

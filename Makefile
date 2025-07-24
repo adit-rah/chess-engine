@@ -12,7 +12,7 @@ OBJECTS = \
     textdisplay.o \
     piece.o rook.o bishop.o queen.o knight.o pawn.o king.o emptypiece.o \
     scoredposition.o \
-    humanplayer.o computerplayer.o ailevel1.o ailevel2.o ailevel3.o
+    humanplayer.o computerplayer.o ailevel1.o ailevel2.o ailevel3.o ailevel4.o
 
 DEPENDS = ${OBJECTS:.o=.d}
 
