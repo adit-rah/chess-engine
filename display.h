@@ -5,9 +5,9 @@
 #include "board.h"
 
 // Abstract base display
-class Display : public Observer {
+class AbstractDisplay : public Observer {
 public:
-    virtual ~Display() {}
+    virtual ~AbstractDisplay() {}
     
     // observer interface --> called when Board (Subject) notifies
     virtual void notify(Subject &whoFrom) override = 0;

@@ -46,7 +46,7 @@ void TextDisplay::notify(Subject& whoFrom) {
     } else if (board.isCheckMate(Colour::Black)) {
         std::cout << "Checkmate! White wins!\n";
     }
-    // For stalemate detection, you can add an isStalemate method to Board and check here
+    // For stalemate detection, we can later add an isStalemate method to Board and check here
     // if (board.isStalemate()) {
     //     std::cout << "Stalemate!\n";
     // }
