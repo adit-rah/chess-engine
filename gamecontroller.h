@@ -11,7 +11,7 @@ class GameController {
     Board *board;                       // Owns the chess board
     Player *players[2];                 // Two players (could be Human or Computer)
     Colour turn;                        // Whose turn is it? White/Black
-    std::vector<Display*> displays;     // Attached displays (Text/Graphical)
+    std::vector<AbstractDisplay*> displays;     // Attached displays (Text/Graphical)
     
     bool isGameRunning = false;         // flags
     bool inSetupMode = false;
@@ -28,7 +28,7 @@ public:
 
     // Core setup
     void startGame(Player* white, Player* black);  // Initialize board, players
-    void attachDisplay(Display* d);                // Add a display observer
+    void attachDisplay(AbstractDisplay* d);                // Add a display observer
     void setBoard(Board* newBoard);
     Player* createPlayerFromString(const std::string& type, Colour c);
 

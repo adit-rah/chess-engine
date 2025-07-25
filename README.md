@@ -1,10 +1,27 @@
 # Chess
 
-## how to use
-compile with make <br>
-**make**        --> makes ./chess executable <br>
-**make run**    --> makes it and runs it <br>
-**make clean**  --> cleans up ur directory <br>
+## How to Use
+
+You can build and run either the **text-only** or the **graphics-enabled** version.
+
+### Build Only
+- **`make`**  
+  Builds the **text-only** version → `./chess`
+  
+- **`make graphics`**  
+  Builds the **graphics-enabled** version → `./chess_graphics`
+
+### Build and Run
+- **`make run`**  
+  Builds (if needed) **and runs** the text-only version
+  
+- **`make run-graphics`**  
+  Builds (if needed) **and runs** the graphics-enabled version
+
+### Clean Up
+- **`make clean`**  
+  Removes all compiled objects, dependencies, and executables
+
 
 ## fish to fry
 - add them here

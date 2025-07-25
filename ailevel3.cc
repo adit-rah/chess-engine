@@ -7,7 +7,7 @@
 using namespace std;
 // helper function to find the least vauable attacker of a square
 // ADD TO .H AFTER
-int getLowestAttackerValue(Board &b, Colour oppColour, Position pos, Position exclude ) {
+int AILevel3::getLowestAttackerValue(Board &b, Colour oppColour, Position pos, Position exclude ) {
      int lowestValue = 100;
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {

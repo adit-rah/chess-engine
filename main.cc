@@ -1,6 +1,10 @@
 #include "gamecontroller.h"
 #include "textdisplay.h"
-#include "player.h"
+
+#ifdef GRAPHICS
+#include "graphicsdisplay.h"
+#endif
+
 #include <iostream>
 #include <string>
 
@@ -8,6 +12,11 @@ int main() {
     GameController game;
     TextDisplay textDisp;
     game.attachDisplay(&textDisp);
+
+#ifdef GRAPHICS
+    GraphicsDisplay gfxDisp;
+    game.attachDisplay(&gfxDisp);
+#endif
 
     std::cout << "Welcome to Chess!\n";
     std::cout << "Commands:\n";
@@ -20,9 +29,8 @@ int main() {
     std::string cmd;
     while (true) {
         std::cout << "> ";
-        std::string cmd;
-        if (!std::getline(std::cin, cmd)) break; // EOF exits
-        if (cmd.empty()) continue;               // <-- ignore empty lines
+        if (!std::getline(std::cin, cmd)) break;
+        if (cmd.empty()) continue;
 
         if (cmd == "quit" || cmd == "exit") break;
         game.processCommand(cmd);
