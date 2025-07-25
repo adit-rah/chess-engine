@@ -16,6 +16,7 @@ int main() {
 #ifdef GRAPHICS
     GraphicsDisplay gfxDisp;
     game.attachDisplay(&gfxDisp);
+    std::cout << "Enabling Graphics Mode\n";
 #endif
 
     std::cout << "Welcome to Chess!\n";

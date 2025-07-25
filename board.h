@@ -13,6 +13,11 @@ class Board : public Subject {
     PieceType lastMovePieceType;
     char pendingPromotionChoice = 'Q';  // next pawn promoted turns into this
 
+    // Board specific Moves
+    bool handleCastling(Position from, Position to);
+    bool handlePromotion(Position from, Position to);
+    bool handleEnPassant(Position from, Position to);
+
 public:
     Board();
     Board(const Board& other);
