@@ -110,6 +110,10 @@ bool GameController::checkGameState() {
                   << " is checkmated! "
                   << (opp == Colour::White ? "Black" : "White")
                   << " wins!\n";
+
+        if (turn == Colour::White) whiteScore += 1.0f;
+        else blackScore += 1.0f;
+        
         return true;
     }
     // you need to see if the opponent is in check after a move 
@@ -120,10 +124,18 @@ bool GameController::checkGameState() {
     // you can then check stalemate
     else if (board->isStaleMate(opp)) {
         std::cout << "Stalemate! The game is a draw.\n";
+
+        whiteScore += 0.5f;
+        blackScore += 0.5f;
+
         return true;
     }
     else if (board->insufficientMaterial()) {
         std::cout << "Draw by insufficient material.\n";
+
+        whiteScore += 0.5f;
+        blackScore += 0.5f;
+
         return true;
     }
     return false;
@@ -293,12 +305,15 @@ void GameController::cmdAutoplay() {
 
         board->notifyObservers();
 
-        if (checkGameState()) break;
+        if (checkGameState()) {
+            isGameRunning = false; 
+            resetGame();
+            break;
+        }
         nextTurn();
     }
 
     std::cout << "Autoplay finished.\n";
-    resetGame();
 }
 
 
@@ -311,6 +326,17 @@ void GameController::cmdResign() {
               << " resigns! "
               << (turn == Colour::White ? "Black" : "White")
               << " wins!\n";
+    
+    if (turn == Colour::White) blackScore += 1.0f;
+    else whiteScore += 1.0f;
+
     isGameRunning = false;
     resetGame();
 }
+
+void GameController::printFinalScore() const {
+    std::cout << "Final Score:\n";
+    std::cout << "White: " << whiteScore << "\n";
+    std::cout << "Black: " << blackScore << "\n";
+}
+

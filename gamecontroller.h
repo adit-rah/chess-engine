@@ -10,6 +10,8 @@
 class GameController {
     Board *board;                       // Owns the chess board
     Player *players[2];                 // Two players (could be Human or Computer)
+    float whiteScore = 0.0f;            // this is just to track score, only a small change to 
+    float blackScore = 0.0f;            // account for more players (make vector)
     Colour turn;                        // Whose turn is it? White/Black
     std::vector<AbstractDisplay*> displays;     // Attached displays (Text/Graphical)
     
@@ -43,6 +45,7 @@ public:
     // Utility
     Colour getCurrentTurn() const;
     Board& getBoard();
+    void printFinalScore() const; 
 };
 
 #endif
