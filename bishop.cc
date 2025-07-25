@@ -19,7 +19,7 @@ std::vector<Position> Bishop::getRawMoves(const Board &b) {
         int r = current.row + dirRow[d];
         int c = current.col + dirCol[d];
 
-        while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
             Piece *target = b.getPieceAt(Position(r, c));
 
             if (!target || target->getType() == PieceType::None) {

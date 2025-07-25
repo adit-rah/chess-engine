@@ -15,11 +15,11 @@ std::vector<Position> Queen::getRawMoves(const Board &b) {
     int dirRow[] = {-1, 1, 0, 0, -1, -1, 1, 1};
     int dirCol[] = {0, 0, -1, 1, -1, 1, -1, 1};
 
-    for (int d = 0; d < 8; ++d) {
+    for (int d = 0; d < BOARD_SIZE; ++d) {
         int r = current.row + dirRow[d];
         int c = current.col + dirCol[d];
 
-        while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
             Piece *target = b.getPieceAt(Position(r, c));
 
             if (!target || target->getType() == PieceType::None) {

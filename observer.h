@@ -1,7 +1,7 @@
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
-
+static const int BOARD_SIZE = 8; // standard chess board size
 class Subject;
 
 class Observer {
