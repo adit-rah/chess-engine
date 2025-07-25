@@ -68,6 +68,8 @@ public:
     bool isInCheck(Colour c) const;
     // are there any moves left?
     bool isCheckMate(Colour c);
+    // are there any moves left? (but no one wins D:)
+    bool isStaleMate(Colour c);
     // finds the kings position on the board
     Position findKing(Colour c) const;
 

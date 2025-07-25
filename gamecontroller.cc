@@ -78,16 +78,24 @@ void GameController::nextTurn() {
 }
 
 bool GameController::checkGameState() {
-    if (board->isCheckMate(turn)) {
-        std::cout << (turn == Colour::White ? "White" : "Black")
+    Colour opp = (turn == Colour::White) ? Colour::Black : Colour::White;
+    // you need to see if the opponent is in checkmate after a move
+    if (board->isCheckMate(opp)) {
+        std::cout << (opp == Colour::White ? "White" : "Black")
                   << " is checkmated! "
-                  << (turn == Colour::White ? "Black" : "White")
+                  << (opp == Colour::White ? "Black" : "White")
                   << " wins!\n";
         return true;
     }
-    else if (board->isInCheck(turn)) {
-        std::cout << (turn == Colour::White ? "White" : "Black")
+    // you need to see if the opponent is in check after a move 
+    else if (board->isInCheck(opp)) {
+        std::cout << (opp == Colour::White ? "White" : "Black")
                   << " is in check!\n";
+    }
+    // you can then check stalemate
+    else if (board->isStaleMate(opp)) {
+        std::cout << "Stalemate! The game is a draw.\n";
+        return true;
     }
     return false;
 }
@@ -171,9 +179,7 @@ void GameController::handleSetupCommand(const std::string &action, std::istrings
     }
 }
 
-// =====================
 // Normal commands
-// =====================
 void GameController::handleNormalCommand(const std::string &action, std::istringstream &iss) {
     if (action == "game") {
         cmdGame(iss);

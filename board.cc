@@ -476,6 +476,24 @@ bool Board::isCheckMate(Colour c) {
 }
 
 
+bool Board::isStaleMate(Colour c) {
+    if (isInCheck(c)) return false;     // king in check means someone can still lose/win
+
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            Piece* p = pieces[row][col];
+            if (!p || p->getColour() != c) continue;
+
+            std::vector<Position> moves = p->getValidMoves(*this);
+
+            if (!moves.empty()) return false; // found at least 1 legal move
+        }
+    }
+
+    return true; // No valid moves left, it's stalemate
+}
+
+
 // Getters for the last move (see .h for documentation)
 
 Position Board::getLastMoveFrom() const { return lastMoveFrom;  }
