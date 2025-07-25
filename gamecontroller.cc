@@ -25,7 +25,7 @@ GameController::~GameController() {
     // Note: players are NOT deleted, assumed external ownership
 }
 
-void GameController::attachDisplay(Display* d) {
+void GameController::attachDisplay(AbstractDisplay* d) {
     displays.push_back(d);
 }
 

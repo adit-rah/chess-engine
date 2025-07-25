@@ -1,5 +1,6 @@
 #include "gamecontroller.h"
 #include "textdisplay.h"
+#include "graphicsdisplay.h"
 #include "player.h"
 #include <iostream>
 #include <string>
@@ -8,6 +9,9 @@ int main() {
     GameController game;
     TextDisplay textDisp;
     game.attachDisplay(&textDisp);
+
+    GraphicsDisplay gfxDisp;
+    game.attachDisplay(&gfxDisp);
 
     std::cout << "Welcome to Chess!\n";
     std::cout << "Commands:\n";

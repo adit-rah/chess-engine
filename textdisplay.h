@@ -4,7 +4,7 @@
 #include "display.h"
 #include <iostream>
 
-class TextDisplay : public Display {
+class TextDisplay : public AbstractDisplay {
 public:
     TextDisplay() = default;
     ~TextDisplay() override = default;
