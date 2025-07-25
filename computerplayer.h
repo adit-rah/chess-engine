@@ -6,6 +6,7 @@
 
 class ComputerPlayer : public Player {
 public:
+    PRNG prng; 
     ComputerPlayer(Colour c) : Player(c) {}
     
     bool makeMove(Board &board, std::istringstream &iss) override;

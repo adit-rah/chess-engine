@@ -8,10 +8,15 @@ class Board : public Subject {
     Piece ***pieces;    // "triple pointer AHH", no it's not that bad.
                         // It's just a 2-D array (chess board; the first two *) of Piece pointers
     
-    Position lastMoveFrom;          // tracking last move will probably be useful for more
-    Position lastMoveTo;            // than just enpassent, so don't doubt it's existence
-    PieceType lastMovePieceType;
+    Position lastMoveFrom = Position(-1,-1);      // tracking last move will probably be useful for more
+    Position lastMoveTo = Position(-1,-1);;       // than just enpassent, so don't doubt it's existence
+    PieceType lastMovePieceType = PieceType::None;
     char pendingPromotionChoice = 'Q';  // next pawn promoted turns into this
+
+    // Board specific Moves
+    bool handleCastling(Position from, Position to);
+    bool handlePromotion(Position from, Position to);
+    bool handleEnPassant(Position from, Position to);
 
 public:
     Board();
@@ -63,6 +68,10 @@ public:
     bool isInCheck(Colour c) const;
     // are there any moves left?
     bool isCheckMate(Colour c);
+    // are there any moves left? (but no one wins D:)
+    bool isStaleMate(Colour c);
+    // is there not enough material to play the game. 
+    bool insufficientMaterial() const;
     // finds the kings position on the board
     Position findKing(Colour c) const;
 
