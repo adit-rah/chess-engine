@@ -30,8 +30,6 @@ int AILevel3::getLowestAttackerValue(Board &b, Colour oppColour, Position pos, P
 }
 
 std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
-    static PRNG prng;                              // remember you did this earlier (adit/ just in case)
-
     std::vector<ScoredPosition> scoredMoves;
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
     // store all squares currently being attacked by the opponent
@@ -107,8 +105,7 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
     }    
     // Pick one at random if there are multiple
     int idx = prng(0, bestMoves.size() - 1);
-    cout << "Score: " << bestMoves[idx].score << endl;
-    cout << "From: " << bestMoves[idx].from.row << bestMoves[idx].from.col << endl;
+    
     return {bestMoves[idx].from, bestMoves[idx].to};
 }
 

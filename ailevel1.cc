@@ -3,8 +3,6 @@
 #include "PRNG.h"
 
 std::vector<Position> AILevel1::determineNextBestMove(Board &b){
-    static PRNG prng;                              // remember you did this earlier (adit/ just in case)
-
     std::vector<ScoredPosition> allMoves;
     for (int row = 0; row < BOARD_SIZE; ++row) {
         for (int col = 0; col < BOARD_SIZE; ++col) {

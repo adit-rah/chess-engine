@@ -20,7 +20,9 @@ class GameController {
     void handleSetupCommand(const std::string &action, std::istringstream &iss);
     void handleNormalCommand(const std::string &action, std::istringstream &iss);
     void cmdGame(std::istringstream &iss);
+    void cmdMove(std::istringstream &iss); 
     void cmdResign();
+    void cmdAutoplay(); 
 
 public:
     GameController();

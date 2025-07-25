@@ -7,8 +7,6 @@
 // Assumes ScoredPosition has: Position from, Position to, int score
 
 std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
-    static PRNG prng;                              // remember you did this earlier (adit/ just in case)
-    
     std::vector<ScoredPosition> scoredMoves;
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
 

@@ -33,21 +33,4 @@ void TextDisplay::notify(Subject& whoFrom) {
         std::cout << "\n";
     }
     std::cout << "  abcdefgh\n";
-
-    // Display check/checkmate/stalemate status:
-    if (board.isInCheck(Colour::White)) {
-        std::cout << "White is in check.\n";
-    }
-    if (board.isInCheck(Colour::Black)) {
-        std::cout << "Black is in check.\n";
-    }
-    if (board.isCheckMate(Colour::White)) {
-        std::cout << "Checkmate! Black wins!\n";
-    } else if (board.isCheckMate(Colour::Black)) {
-        std::cout << "Checkmate! White wins!\n";
-    }
-    // For stalemate detection, we can later add an isStalemate method to Board and check here
-    // if (board.isStalemate()) {
-    //     std::cout << "Stalemate!\n";
-    // }
 }

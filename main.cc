@@ -1,27 +1,46 @@
 #include "gamecontroller.h"
 #include "textdisplay.h"
-
-#ifdef GRAPHICS
 #include "graphicsdisplay.h"
-#endif
+#include "logdisplay.h"
 
 #include <iostream>
 #include <string>
 
-int main() {
+int main(int argc, char *argv[]) {
     GameController game;
     TextDisplay textDisp;
     game.attachDisplay(&textDisp);
 
-#ifdef GRAPHICS
-    GraphicsDisplay gfxDisp;
-    game.attachDisplay(&gfxDisp);
-#endif
+    bool enableGraphics = false;
+    bool enableLogging = false;
+
+    // check for the flags
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "-g" || std::string(argv[i]) == "-graphics") {
+            enableGraphics = true;
+        }
+        if (std::string(argv[i]) == "-l" || std::string(argv[i]) == "-log") {
+            enableLogging = true;
+        }
+    }
+
+    std::unique_ptr<GraphicsDisplay> gfxDisp;
+    if (enableGraphics) {
+        gfxDisp = std::make_unique<GraphicsDisplay>();  // only allocate if needed
+        game.attachDisplay(gfxDisp.get());
+    }
+
+    std::unique_ptr<LogDisplay> log;
+    if (enableLogging) {
+        log = std::make_unique<LogDisplay>();           // only allocate if needed
+        game.attachDisplay(log.get());
+    }
 
     std::cout << "Welcome to Chess!\n";
     std::cout << "Commands:\n";
-    std::cout << "  game white-player black-player   (human or computer1)\n";
-    std::cout << "  move e2 e4                      (or just 'move' for AI)\n";
+    std::cout << "  game white-player black-player   (human or computer[1-4])\n";
+    std::cout << "  move e2 e4                       (or just 'move' for AI)\n";
+    std::cout << "  autoplay                         (two computer players are required)\n";
     std::cout << "  resign\n";
     std::cout << "  setup (then +K e1, -e1, etc.)\n";
     std::cout << "  Ctrl+D to quit.\n\n";
