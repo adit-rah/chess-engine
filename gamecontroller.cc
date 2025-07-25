@@ -22,7 +22,8 @@ GameController::GameController() : turn(Colour::White), isGameRunning(false) {
 
 GameController::~GameController() {
     delete board;
-    // Note: players are NOT deleted, assumed external ownership
+    delete players[0];
+    delete players[1];
 }
 
 void GameController::attachDisplay(AbstractDisplay* d) {

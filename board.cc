@@ -87,9 +87,12 @@ Board::Board(const Board& other) {
 
 Board::~Board() {
     for (int i = 0; i < 8; ++i) {
-        delete pieces[i];
+        for (int j = 0; j < 8; ++j) {
+            delete pieces[i][j];
+        }
+        delete[] pieces[i];
     }
-    delete pieces; 
+    delete[] pieces; 
 }
 
 

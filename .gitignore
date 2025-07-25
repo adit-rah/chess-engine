@@ -1,7 +1,7 @@
 *.o
 *.d
 chess
-chess_graphics
+chess_log.txt
 *.in
 *.out
 tests
