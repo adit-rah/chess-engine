@@ -11,6 +11,7 @@ class Xwindow {
     GC gc;
     Pixmap backBuffer;
     std::vector<unsigned long> colours;
+    const int NUM_OF_COLOURS = 8;
 
 public:
     Xwindow(int width = 500, int height = 500);  // Constructor

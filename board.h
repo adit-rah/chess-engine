@@ -7,7 +7,8 @@
 class Board : public Subject {
     Piece ***pieces;    // "triple pointer AHH", no it's not that bad.
                         // It's just a 2-D array (chess board; the first two *) of Piece pointers
-    
+
+    const int BOARD_SIZE = 8;              // standard chess board size
     Position lastMoveFrom = Position(-1,-1);      // tracking last move will probably be useful for more
     Position lastMoveTo = Position(-1,-1);;       // than just enpassent, so don't doubt it's existence
     PieceType lastMovePieceType = PieceType::None;
@@ -75,7 +76,7 @@ public:
     // finds the kings position on the board
     Position findKing(Colour c) const;
 
-    // getters for the last move ========
+    // getters for the last move & board size ========
 
     // returns the starting position of the last move
     Position getLastMoveFrom() const;
@@ -83,6 +84,8 @@ public:
     Position getLastMoveTo() const;
     // returns the type of the piece that moved last
     PieceType getLastMovePieceType() const;
+    // returns the size of the board
+    int getBoardSize() const; 
 
     // setter for the promotion ========
     void setPendingPromotion(char p);

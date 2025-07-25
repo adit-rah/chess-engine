@@ -525,6 +525,8 @@ Position Board::getLastMoveTo() const {  return lastMoveTo;  }
 
 PieceType Board::getLastMovePieceType() const {  return lastMovePieceType;  }
 
+int Board::getBoardSize() const {   return BOARD_SIZE;  }
+
 // Setter
 
 void Board::setPendingPromotion(char p) {  pendingPromotionChoice = p;  }

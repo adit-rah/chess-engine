@@ -10,8 +10,8 @@ using namespace std;
 int AILevel3::getLowestAttackerValue(Board &b, Colour oppColour, Position pos, Position exclude ) {
      int lowestValue = 100;
      Colour colour = (oppColour == Colour::White) ? Colour::Black : Colour::White;
-    for (int row = 0; row < BOARD_SIZE; row++) {
-        for (int col = 0; col < BOARD_SIZE; col++) {
+    for (int row = 0; row < b.getBoardSize(); row++) {
+        for (int col = 0; col < b.getBoardSize(); col++) {
             Position attackerPos(row, col);
 
             // Exclude a specific position (like the one we're moving from)
@@ -34,8 +34,8 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
     // store all squares currently being attacked by the opponent
     std::vector<Position> dangerSquares = b.squaresBeingAttackedBy(oppColour);
-    for (int row = 0; row < BOARD_SIZE; ++row) {
-        for (int col = 0; col < BOARD_SIZE; ++col) {
+    for (int row = 0; row < b.getBoardSize(); ++row) {
+        for (int col = 0; col < b.getBoardSize(); ++col) {
             Position from(row, col);
             int lowestAttackerValue = getLowestAttackerValue(b, oppColour, from);
 

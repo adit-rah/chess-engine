@@ -4,8 +4,8 @@
 
 std::vector<Position> AILevel1::determineNextBestMove(Board &b){
     std::vector<ScoredPosition> allMoves;
-    for (int row = 0; row < BOARD_SIZE; ++row) {
-        for (int col = 0; col < BOARD_SIZE; ++col) {
+    for (int row = 0; row < b.getBoardSize(); ++row) {
+        for (int col = 0; col < b.getBoardSize(); ++col) {
             Piece* piece = b.getPieceAt(Position(row, col));
             if (piece && piece->getColour() == colour) {
                 std::vector<Position> moves = piece->getValidMoves(b);

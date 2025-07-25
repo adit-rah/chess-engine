@@ -15,11 +15,11 @@ std::vector<Position> Knight::getRawMoves(const Board &b) {
     int moveRow[] = {-2, -2, -1, -1, 1, 1, 2, 2};
     int moveCol[] = {-1, 1, -2, 2, -2, 2, -1, 1};
 
-    for (int i = 0; i < BOARD_SIZE; ++i) {
+    for (int i = 0; i < b.getBoardSize(); ++i) {
         int r = current.row + moveRow[i];
         int c = current.col + moveCol[i];
 
-        if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+        if (r >= 0 && r < b.getBoardSize() && c >= 0 && c < b.getBoardSize()) {
             Piece *target = b.getPieceAt(Position(r, c));
             if (!target || target->getType() == PieceType::None || target->getColour() != myColour) {
                 moves.push_back(Position(r, c));
