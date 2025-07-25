@@ -1,6 +1,7 @@
 *.o
 *.d
 chess
+chess_graphics
 *.in
 *.out
 tests

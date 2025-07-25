@@ -2,6 +2,10 @@
 CXX = g++-14
 CXXFLAGS = -std=c++20 -Wall -MMD -Werror=vla
 
+# graphics specific flag
+GRAPHICS_FLAGS = -DGRAPHICS
+graphics: CXXFLAGS += $(GRAPHICS_FLAGS)
+
 # executables
 EXEC = chess
 GRAPHICS_EXEC = chess_graphics
@@ -31,7 +35,7 @@ ${EXEC}: ${BASE_OBJECTS}
 
 # Graphics-enabled binary
 ${GRAPHICS_EXEC}: ${BASE_OBJECTS} ${GRAPHICS_OBJECTS}
-	${CXX} ${CXXFLAGS} -DGRAPHICS ${BASE_OBJECTS} ${GRAPHICS_OBJECTS} -o ${GRAPHICS_EXEC} -lX11
+	${CXX} ${CXXFLAGS} ${BASE_OBJECTS} ${GRAPHICS_OBJECTS} -o ${GRAPHICS_EXEC} -lX11
 
 %.o: %.cc
 	${CXX} ${CXXFLAGS} -c $< -o $@
