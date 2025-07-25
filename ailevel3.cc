@@ -29,8 +29,6 @@ int AILevel3::getLowestAttackerValue(Board &b, Colour oppColour, Position pos, P
 }
 
 std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
-    static PRNG prng;                              // remember you did this earlier (adit/ just in case)
-
     std::vector<ScoredPosition> scoredMoves;
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
     // store all squares currently being attacked by the opponent
