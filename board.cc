@@ -494,6 +494,29 @@ bool Board::isStaleMate(Colour c) {
 }
 
 
+bool Board::insufficientMaterial() const {
+    int minors = 0;
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            Piece* p = getPieceAt({r,c});
+            if (!p) continue;
+            auto t = p->getType();
+
+            // any heavy piece or pawn = enough material
+            if (t == PieceType::Queen || t == PieceType::Rook || t == PieceType::Pawn) return false;
+
+            // count bishops/knights
+            if (t == PieceType::Bishop || t == PieceType::Knight) {
+                minors++;
+                if (minors > 1) return false; // 2 minors = still possible to mate
+            }
+        }
+    }
+
+    return true; // no mate possible
+}
+
+
 // Getters for the last move (see .h for documentation)
 
 Position Board::getLastMoveFrom() const { return lastMoveFrom;  }

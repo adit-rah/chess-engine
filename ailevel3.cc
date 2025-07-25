@@ -106,8 +106,7 @@ std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
     }    
     // Pick one at random if there are multiple
     int idx = prng(0, bestMoves.size() - 1);
-    cout << "Score: " << bestMoves[idx].score << endl;
-    cout << "From: " << bestMoves[idx].from.row << bestMoves[idx].from.col << endl;
+    
     return {bestMoves[idx].from, bestMoves[idx].to};
 }
 

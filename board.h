@@ -70,6 +70,8 @@ public:
     bool isCheckMate(Colour c);
     // are there any moves left? (but no one wins D:)
     bool isStaleMate(Colour c);
+    // is there not enough material to play the game. 
+    bool insufficientMaterial() const;
     // finds the kings position on the board
     Position findKing(Colour c) const;
 

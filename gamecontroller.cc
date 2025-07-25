@@ -97,6 +97,10 @@ bool GameController::checkGameState() {
         std::cout << "Stalemate! The game is a draw.\n";
         return true;
     }
+    else if (board->insufficientMaterial()) {
+        std::cout << "Draw by insufficient material.\n";
+        return true;
+    }
     return false;
 }
 
@@ -121,9 +125,7 @@ void GameController::processCommand(const std::string& cmd) {
         handleNormalCommand(action, iss);
 }
 
-// =====================
 // Setup mode commands
-// =====================
 void GameController::handleSetupCommand(const std::string &action, std::istringstream &iss) {
     static Colour forcedTurn = turn; // keep last chosen turn
 
@@ -181,37 +183,10 @@ void GameController::handleSetupCommand(const std::string &action, std::istrings
 
 // Normal commands
 void GameController::handleNormalCommand(const std::string &action, std::istringstream &iss) {
-    if (action == "game") {
-        cmdGame(iss);
-    }
-    else if (action == "move") {
-        if (!isGameRunning) {
-            std::cout << "No game running. Use 'game' to start.\n";
-            return;
-        }
-
-        Player* currentPlayer = (turn == Colour::White) ? players[0] : players[1];
-        if (!currentPlayer) {
-            std::cout << "No player for this colour.\n";
-            return;
-        }
-
-        // Let the player handle the move 
-        if (!currentPlayer->makeMove(*board, iss)) {
-            std::cout << "Invalid move.\n";
-            return;
-        }
-
-        board->notifyObservers();
-        if (checkGameState()) {
-            isGameRunning = false;
-            return;
-        }
-        nextTurn();
-    }
-    else if (action == "resign") {
-        cmdResign();
-    }
+    if (action == "game") cmdGame(iss);
+    else if (action == "move") cmdMove(iss);
+    else if (action == "resign") cmdResign();
+    else if (action == "autoplay") cmdAutoplay();
     else {
         std::cout << "Unknown command.\n";
     }
@@ -236,6 +211,65 @@ void GameController::cmdGame(std::istringstream &iss) {
 
     startGame(whitePlayer, blackPlayer);
 }
+
+
+void GameController::cmdMove(std::istringstream& iss) {
+    if (!isGameRunning) {
+        std::cout << "No game running. Use 'game' to start.\n";
+        return;
+    }
+
+    Player* currentPlayer = (turn == Colour::White) ? players[0] : players[1];
+    if (!currentPlayer) {
+        std::cout << "No player for this colour.\n";
+        return;
+    }
+
+    // Let the player handle the move 
+    if (!currentPlayer->makeMove(*board, iss)) {
+        std::cout << "Invalid move.\n";
+        return;
+    }
+
+    board->notifyObservers();
+    if (checkGameState()) {
+        isGameRunning = false;
+        return;
+    }
+    nextTurn();
+}
+
+void GameController::cmdAutoplay() {
+    if (!isGameRunning) {
+        std::cout << "No game running. Use 'game' to start.\n";
+        return;
+    }
+
+    std::cout << "Autoplay running...\n";
+
+    while (isGameRunning) {
+        Player* currentPlayer = (turn == Colour::White) ? players[0] : players[1];
+
+        // Try a move
+        std::istringstream dummy;
+        if (!currentPlayer->makeMove(*board, dummy)) break;
+
+        // Print last move
+        auto from = board->getLastMoveFrom();
+        auto to   = board->getLastMoveTo();
+        std::cout << (turn == Colour::White ? "White" : "Black") 
+                  << " moves " << char('a' + from.col) << (from.row + 1)
+                  << " -> "   << char('a' + to.col)   << (to.row + 1) << "\n";
+
+        board->notifyObservers();
+
+        if (checkGameState()) break;
+        nextTurn();
+    }
+
+    std::cout << "Autoplay finished.\n";
+}
+
 
 void GameController::cmdResign() {
     if (!isGameRunning) {

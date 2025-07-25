@@ -21,8 +21,8 @@ int main() {
 
     std::cout << "Welcome to Chess!\n";
     std::cout << "Commands:\n";
-    std::cout << "  game white-player black-player   (human or computer1)\n";
-    std::cout << "  move e2 e4                      (or just 'move' for AI)\n";
+    std::cout << "  game white-player black-player      (human or computer[1-4])\n";
+    std::cout << "  move e2 e4                          (or just 'move' for AI)\n";
     std::cout << "  resign\n";
     std::cout << "  setup (then +K e1, -e1, etc.)\n";
     std::cout << "  Ctrl+D to quit.\n\n";
