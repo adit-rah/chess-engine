@@ -17,7 +17,7 @@ std::vector<Position> Pawn::getRawMoves(const Board &b) {
 
     // 1. one square forward if empty
     Position oneAhead(current.row + direction, current.col);
-    if (oneAhead.row >= 0 && oneAhead.row < 8) {
+    if (oneAhead.row >= 0 && oneAhead.row < BOARD_SIZE) {
         Piece* oneAheadPiece = b.getPieceAt(oneAhead);
         if (oneAheadPiece == nullptr || oneAheadPiece->getType() == PieceType::None) {
             moves.push_back(oneAhead);
@@ -26,7 +26,7 @@ std::vector<Position> Pawn::getRawMoves(const Board &b) {
             Position twoAhead(current.row + 2 * direction, current.col);
             if (current.row == startRow) {
                 Piece* twoAheadPiece = b.getPieceAt(twoAhead);
-                if ((twoAhead.row >= 0 && twoAhead.row < 8) &&
+                if ((twoAhead.row >= 0 && twoAhead.row < BOARD_SIZE) &&
                     (twoAheadPiece == nullptr || twoAheadPiece->getType() == PieceType::None)) {
                     moves.push_back(twoAhead);
                 }
@@ -38,7 +38,7 @@ std::vector<Position> Pawn::getRawMoves(const Board &b) {
     int diagCols[] = {current.col - 1, current.col + 1};
     for (int c : diagCols) {
         Position diagPos(current.row + direction, c);
-        if (diagPos.row >= 0 && diagPos.row < 8 && c >= 0 && c < 8) {
+        if (diagPos.row >= 0 && diagPos.row < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
             Piece* target = b.getPieceAt(diagPos);
             if (target != nullptr && target->getType() != PieceType::None && target->getColour() != myColour) {
                 moves.push_back(diagPos);

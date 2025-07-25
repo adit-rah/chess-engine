@@ -3,6 +3,8 @@
 
 #include <vector>
 
+static const int BOARD_SIZE = 8; // standard chess board size
+
 class Observer;
 
 class Subject {

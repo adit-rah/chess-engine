@@ -22,7 +22,7 @@ std::vector<Position> Rook::getRawMoves(const Board &b) {
         int c = current.col + dirCol[d];
 
         // Move along this direction until blocked
-        while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
             Position nextPos(r, c);
             Piece *target = b.getPieceAt(nextPos);
 

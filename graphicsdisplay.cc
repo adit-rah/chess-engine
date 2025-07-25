@@ -9,12 +9,12 @@
 GraphicsDisplay::GraphicsDisplay(int size)
     : window(size + 40, size + 40),          // extra margin for labels
       windowSize(size),
-      squareSize(size / 8),
+      squareSize(size / BOARD_SIZE),
       labelMargin(20)                        // space for labels
 {
     // initialize lastBoard to empty
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+        for (int c = 0; c < BOARD_SIZE; ++c) {
             lastBoard[r][c] = '\0';
         }
     }
@@ -24,8 +24,8 @@ GraphicsDisplay::GraphicsDisplay(int size)
 }
 
 void GraphicsDisplay::drawStaticBoard() {
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+        for (int c = 0; c < BOARD_SIZE; ++c) {
             int screenRow = 7 - r; // flip vertically
             int x = labelMargin + c * squareSize;
             int y = labelMargin + screenRow * squareSize;
@@ -38,7 +38,7 @@ void GraphicsDisplay::drawStaticBoard() {
     }
 
     // rank labels (1–8, bottom to top)
-    for (int r = 0; r < 8; ++r) {
+    for (int r = 0; r < BOARD_SIZE; ++r) {
         int screenRow = 7 - r;
         int yCenter = labelMargin + screenRow * squareSize + squareSize / 2;
         char rankChar = '1' + r;
@@ -46,9 +46,9 @@ void GraphicsDisplay::drawStaticBoard() {
     }
 
     // file labels (a–h) still same
-    for (int c = 0; c < 8; ++c) {
+    for (int c = 0; c < BOARD_SIZE; ++c) {
         int xCenter = labelMargin + c * squareSize + squareSize / 3;
-        int yBottom = labelMargin + 8 * squareSize + 15;
+        int yBottom = labelMargin + BOARD_SIZE * squareSize + 15;
         char fileChar = 'a' + c;
         window.drawString(xCenter, yBottom, std::string(1, fileChar), Xwindow::White);
     }
@@ -67,8 +67,8 @@ void GraphicsDisplay::drawPiece(int r, int c, char sym) {
 void GraphicsDisplay::notify(Subject &whoFrom) {
     Board &board = dynamic_cast<Board &>(whoFrom);
 
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+        for (int c = 0; c < BOARD_SIZE; ++c) {
             Piece *piece = board.getPieceAt(Position(r, c));
             char symbol;
 

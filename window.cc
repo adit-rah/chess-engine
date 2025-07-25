@@ -35,7 +35,7 @@ Xwindow::Xwindow(int width, int height) : width(width), height(height) {
 }
 
 void Xwindow::initColours() {
-    colours.resize(8);
+    colours.resize(BOARD_SIZE);
 
     colours[White] = WhitePixel(d, s);
     colours[Black] = BlackPixel(d, s);

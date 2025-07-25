@@ -15,11 +15,11 @@ std::vector<Position> King::getRawMoves(const Board &b) {
     int dirCol[] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
     // normal adjacent squares
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < BOARD_SIZE; ++i) {
         int r = current.row + dirRow[i];
         int c = current.col + dirCol[i];
 
-        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
             Piece* target = b.getPieceAt(Position(r, c));
             if (target == nullptr || target->getColour() != myColour) {
                 moves.push_back(Position(r, c));

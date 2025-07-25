@@ -13,10 +13,10 @@
 
 // Constructor/Destructor 
 Board::Board() {
-    pieces = new Piece**[8];
-    for (int i = 0; i < 8; ++i) {
-        pieces[i] = new Piece*[8];
-        for (int j = 0; j < 8; ++j) {
+    pieces = new Piece**[BOARD_SIZE];
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        pieces[i] = new Piece*[BOARD_SIZE];
+        for (int j = 0; j < BOARD_SIZE; ++j) {
             pieces[i][j] = nullptr;
         }
     }
@@ -24,17 +24,17 @@ Board::Board() {
 
 Board::Board(const Board& other) {
     // Allocate memory for pieces array (same as default constructor)
-    pieces = new Piece**[8];
-    for (int i = 0; i < 8; ++i) {
-        pieces[i] = new Piece*[8];
-        for (int j = 0; j < 8; ++j) {
+    pieces = new Piece**[BOARD_SIZE];
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        pieces[i] = new Piece*[BOARD_SIZE];
+        for (int j = 0; j < BOARD_SIZE; ++j) {
             pieces[i][j] = nullptr;
         }
     }
 
     // Copy all pieces deeply
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+        for (int c = 0; c < BOARD_SIZE; ++c) {
             Piece* p = other.pieces[r][c];
             // Delete existing piece in destination if any
             if (pieces[r][c]) {
@@ -85,7 +85,7 @@ Board::Board(const Board& other) {
 
 
 Board::~Board() {
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < BOARD_SIZE; ++i) {
         delete pieces[i];
     }
     delete pieces; 
@@ -97,7 +97,7 @@ Board::~Board() {
 void Board::setPieces() {       // default chess board
     // === WHITE PIECES ===
     // Pawns
-    for (int c = 0; c < 8; ++c) {
+    for (int c = 0; c < BOARD_SIZE; ++c) {
         pieces[1][c] = new Pawn(Colour::White, Position(1, c));
     }
     // Back row
@@ -112,7 +112,7 @@ void Board::setPieces() {       // default chess board
 
     // === BLACK PIECES ===
     // Pawns
-    for (int c = 0; c < 8; ++c) {
+    for (int c = 0; c < BOARD_SIZE; ++c) {
         pieces[6][c] = new Pawn(Colour::Black, Position(6, c));
     }
     // Back row
@@ -127,7 +127,7 @@ void Board::setPieces() {       // default chess board
 
     // === EMPTY SQUARES ===
     for (int r = 2; r <= 5; ++r) {
-        for (int c = 0; c < 8; ++c) {
+        for (int c = 0; c < BOARD_SIZE; ++c) {
             pieces[r][c] = new EmptyPiece(Position(r,c)); // or new EmptyPiece if you prefer
         }
     }
@@ -142,7 +142,7 @@ void Board::resetBoard() {
 // Move Validation methods (see .h for documentation)
 
 Piece* Board::getPieceAt(Position p) const {
-    if (p.row < 0 || p.row >= 8 || p.col < 0 || p.col >= 8) {
+    if (p.row < 0 || p.row >= BOARD_SIZE || p.col < 0 || p.col >= BOARD_SIZE) {
         return nullptr; 
     }
     return pieces[p.row][p.col];
@@ -376,8 +376,8 @@ bool Board::validateSetup() const {
     int whiteKingCount = 0;
     int blackKingCount = 0;
 
-    for (int r = 0; r < 8; r++) {
-        for (int c = 0; c < 8; c++) {
+    for (int r = 0; r < BOARD_SIZE; r++) {
+        for (int c = 0; c < BOARD_SIZE; c++) {
             Piece* p = pieces[r][c];
             if (!p) continue;
 
@@ -409,8 +409,8 @@ bool Board::validateSetup() const {
 
 std::vector<Position> Board::squaresBeingAttackedBy(Colour c) const {
     std::vector<Position> attackedSquares;
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        for (int j = 0; j < BOARD_SIZE; ++j) {
             Piece* piece = pieces[i][j];
             if (piece && piece->getColour() == c) {
                 std::vector<Position> validMoves = piece->getRawMoves(*this); // squares being seen
@@ -423,8 +423,8 @@ std::vector<Position> Board::squaresBeingAttackedBy(Colour c) const {
 
 
 Position Board::findKing(Colour c) const {
-    for (int row = 0; row < 8; ++row) {
-        for (int col = 0; col < 8; ++col) {
+    for (int row = 0; row < BOARD_SIZE; ++row) {
+        for (int col = 0; col < BOARD_SIZE; ++col) {
             Piece* p = pieces[row][col];
             if (p != nullptr && p->getColour() == c && p->getType() == PieceType::King) {
                 return Position(row, col);
@@ -454,8 +454,8 @@ bool Board::isInCheck(Colour c) const {
 bool Board::isCheckMate(Colour c) {
     if (!isInCheck(c)) return false;
 
-    for (int row = 0; row < 8; ++row) {
-        for (int col = 0; col < 8; ++col) {
+    for (int row = 0; row < BOARD_SIZE; ++row) {
+        for (int col = 0; col < BOARD_SIZE; ++col) {
             Piece* p = pieces[row][col];
             if (!p || p->getColour() != c) continue;
 

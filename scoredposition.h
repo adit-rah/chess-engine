@@ -1,7 +1,6 @@
 #ifndef SCOREDPOSITION_H
 #define SCOREDPOSITION_H
 #include "piece.h"
-
 class ScoredPosition {
 public:
     Position to;
