@@ -87,7 +87,10 @@ Board::Board(const Board& other) {
 
 Board::~Board() {
     for (int i = 0; i < BOARD_SIZE; ++i) {
-        delete pieces[i];
+         for (int c = 0; c < BOARD_SIZE; ++c) {
+            delete pieces[i][c];  // deletes the piece itself (can be nullptr safely)
+        }
+        delete[] pieces[i];
     }
     delete[] pieces; 
 }
@@ -132,6 +135,29 @@ void Board::setPieces() {       // default chess board
             pieces[r][c] = new EmptyPiece(Position(r,c)); // or new EmptyPiece if you prefer
         }
     }
+}
+
+
+void Board::emptyTheBoard() {
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+        for (int c = 0; c < BOARD_SIZE; ++c) {
+            // If there's already a piece, delete it first to avoid leaks
+            if (pieces[r][c] != nullptr) {
+                delete pieces[r][c];
+            }
+            // Replace with an EmptyPiece
+            pieces[r][c] = new EmptyPiece(Position(r, c));
+        }
+    }
+
+    // Reset last move tracking
+    lastMoveFrom = Position(-1, -1);
+    lastMoveTo = Position(-1, -1);
+    lastMovePieceType = PieceType::None;
+    pendingPromotionChoice = 'Q';
+
+    // Notify displays so they update to show an empty board
+    notifyObservers();
 }
 
 

@@ -33,6 +33,7 @@ public:
     void attachDisplay(AbstractDisplay* d);                // Add a display observer
     void setBoard(Board* newBoard);
     Player* createPlayerFromString(const std::string& type, Colour c);
+    void resetGame(); 
 
     // Main game loop helpers
     void processCommand(const std::string &cmd);

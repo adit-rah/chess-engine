@@ -15,9 +15,9 @@ static Position parseAlgebraic(const std::string &sq) {
 }
 
 GameController::GameController() : turn(Colour::White), isGameRunning(false) {
-    board = new Board();
     players[0] = nullptr;
     players[1] = nullptr;
+    board = nullptr; // this is handled elsewhere
 }
 
 GameController::~GameController() {
@@ -47,7 +47,10 @@ void GameController::startGame(Player* white, Player* black) {
     players[0] = white;
     players[1] = black;
     turn = Colour::White;
-    board->resetBoard();
+    if (!board) {
+        board = new Board();
+        board->resetBoard();
+    }
     isGameRunning = true;
 
     std::cout << "Game started! White moves first.\n";
@@ -73,6 +76,27 @@ Player* GameController::createPlayerFromString(const std::string& type, Colour c
     }
     return nullptr;
 }
+
+
+void GameController::resetGame() {
+    // free existing players
+    delete players[0];
+    delete players[1];
+    players[0] = nullptr;
+    players[1] = nullptr;
+
+    // reset the turn
+    turn = Colour::White;
+    isGameRunning = false;
+
+    if (board) {
+        delete board; 
+        board = nullptr;    // dangling!!
+    }
+
+    std::cout << "Game has been reset.\n";
+}
+
 
 void GameController::nextTurn() {
     turn = (turn == Colour::White) ? Colour::Black : Colour::White;
@@ -116,6 +140,10 @@ void GameController::processCommand(const std::string& cmd) {
     if (action == "setup") {
         inSetupMode = true;
         std::cout << "Entering setup mode. Use +, -, =, done.\n";
+        if (!board) {
+            board = new Board();
+            board->emptyTheBoard();
+        }
         return;
     }
 
@@ -235,6 +263,7 @@ void GameController::cmdMove(std::istringstream& iss) {
     board->notifyObservers();
     if (checkGameState()) {
         isGameRunning = false;
+        resetGame(); 
         return;
     }
     nextTurn();
@@ -269,6 +298,7 @@ void GameController::cmdAutoplay() {
     }
 
     std::cout << "Autoplay finished.\n";
+    resetGame();
 }
 
 
@@ -282,4 +312,5 @@ void GameController::cmdResign() {
               << (turn == Colour::White ? "Black" : "White")
               << " wins!\n";
     isGameRunning = false;
+    resetGame();
 }

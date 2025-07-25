@@ -33,6 +33,8 @@ public:
     
     // sets pieces in the default way
     void setPieces();
+    // set empty board
+    void emptyTheBoard(); 
     // resets all the pieces to default positions
     void resetBoard();
 
