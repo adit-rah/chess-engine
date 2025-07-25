@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+// X11 wrapper to make things easier to work with
 class Xwindow {
     Display *d;
     Window w;

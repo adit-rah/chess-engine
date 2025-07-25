@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 
+// just another display
 class LogDisplay : public AbstractDisplay {
     std::ofstream logFile;   // file stream for logging
     bool whiteToMove = true; // track move number formatting

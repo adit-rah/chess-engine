@@ -16,6 +16,8 @@ class Position {
         bool operator==(const Position& other) const;
 };
 
+// piece is mostly a data dummy, they most they do is get the moves you can make with them.
+// but other than that, nothing much 
 class Piece {
     int value;
     PieceType type;

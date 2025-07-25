@@ -3,6 +3,7 @@
 
 #include "computerplayer.h"
 
+// refer to computerplayer.h for documentation
 class AILevel4 : public ComputerPlayer {
 public:
     AILevel4(Colour c) : ComputerPlayer(c) {}
