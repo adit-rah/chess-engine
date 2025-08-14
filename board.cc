@@ -441,17 +441,29 @@ bool Board::validateSetup() const {
 // Attacking Logic and Handling methods (see .h for documentation)
 
 std::vector<Position> Board::squaresBeingAttackedBy(Colour c) const {
-    std::vector<Position> attackedSquares;
+    bool attacked[8][8] = {}; // all false initially
+
     for (int i = 0; i < BOARD_SIZE; ++i) {
         for (int j = 0; j < BOARD_SIZE; ++j) {
             Piece* piece = pieces[i][j];
             if (piece && piece->getColour() == c) {
-                std::vector<Position> validMoves = piece->getRawMoves(*this); // squares being seen
-                attackedSquares.insert(attackedSquares.end(), validMoves.begin(), validMoves.end());
+                for (const Position& pos : piece->getRawMoves(*this)) {
+                    attacked[pos.row][pos.col] = true;
+                }
             }
         }
     }
-    return attackedSquares;
+
+    std::vector<Position> result;
+    for (int r = 0; r < BOARD_SIZE; ++r) {
+        for (int col = 0; col < BOARD_SIZE; ++col) {
+            if (attacked[r][col]) {
+                result.push_back(Position(r, col));
+            }
+        }
+    }
+
+    return result;
 }
 
 
@@ -524,7 +536,7 @@ bool Board::insufficientMaterial() const {
     int minors = 0;
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
-            Piece* p = getPieceAt({r,c});
+            Piece* p = pieces[r][c];
             if (!p) continue;
             auto t = p->getType();
 
