@@ -3,6 +3,22 @@
 A C++20 chess game with text-based display and graphical mode using X11. <br>
 Supports human vs human, human vs AI, and AI vs AI with four difficulty levels.
 
+## Project Structure
+
+```
+chess-engine/
+├── src/
+│   ├── core/       # Game logic, board, and main entry point
+│   ├── pieces/     # Chess piece implementations
+│   ├── players/    # Human and computer player classes
+│   ├── ai/         # AI difficulty levels (1-4)
+│   ├── display/    # Text, graphics, and log displays
+│   ├── patterns/   # Observer/Subject design patterns
+│   └── utils/      # Utility classes (PRNG, window)
+├── Makefile
+└── README.md
+```
+
 ## Requirements
 
 - C++20 compiler (tested with g++-14)
