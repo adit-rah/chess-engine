@@ -1,6 +1,7 @@
 # compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall -MMD -Werror=vla -Isrc/core -Isrc/pieces -Isrc/players -Isrc/ai -Isrc/display -Isrc/patterns -Isrc/utils
+CXXFLAGS = -std=c++20 -Wall -MMD -Werror=vla -Isrc/core -Isrc/pieces -Isrc/players -Isrc/ai -Isrc/display -Isrc/patterns -Isrc/utils $(shell sdl2-config --cflags)
+LDFLAGS = $(shell sdl2-config --libs) -lSDL2_ttf
 
 # final executable
 EXEC = chess
@@ -49,9 +50,9 @@ DEPENDS = ${OBJECTS:.o=.d}
 # default build
 all: ${EXEC}
 
-# final link step → always include graphics code, link X11
+# final link step → link SDL2 libraries
 ${EXEC}: ${OBJECTS}
-	${CXX} ${CXXFLAGS} ${OBJECTS} -o ${EXEC} -lX11
+	${CXX} ${CXXFLAGS} ${OBJECTS} -o ${EXEC} ${LDFLAGS}
 
 %.o: %.cc
 	${CXX} ${CXXFLAGS} -c $< -o $@

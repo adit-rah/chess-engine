@@ -1,24 +1,29 @@
 #ifndef __WINDOW_H__
 #define __WINDOW_H__
-#include <X11/Xlib.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <string>
 #include <vector>
+#include <memory>
 
-// X11 wrapper to make things easier to work with
-class Xwindow {
-    Display *d;
-    Window w;
-    int s, width, height;
-    GC gc;
-    Pixmap backBuffer;
-    std::vector<unsigned long> colours;
+// SDL2 wrapper for graphics rendering
+class SDLWindow {
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    TTF_Font* font;
+    int width, height;
+    
+    struct Color {
+        Uint8 r, g, b, a;
+    };
+    std::vector<Color> colours;
     const int NUM_OF_COLOURS = 8;
 
 public:
-    Xwindow(int width = 500, int height = 500);  // Constructor
-    ~Xwindow();                                  // Destructor
+    SDLWindow(int width = 500, int height = 500);  // Constructor
+    ~SDLWindow();                                  // Destructor
 
-    // Basic colour enum
+    // Basic colour enum (matching old API for compatibility)
     enum Colour { White = 0, Black, Red, Green, Blue, LightBrown, DarkBrown, Grey };
 
     int getWidth() const;
@@ -31,9 +36,14 @@ public:
     void drawString(int x, int y, const std::string &msg, int colour = Black);
 
     void flush();
+    void clear();
 
 private:
     void initColours(); // Helper to load all colours
+    void setDrawColor(int colour);
 };
+
+// Type alias for backward compatibility
+using Xwindow = SDLWindow;
 
 #endif

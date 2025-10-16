@@ -1,7 +1,4 @@
 #include "graphicsdisplay.h"
-#ifdef None
-#undef None
-
 #include "board.h"
 #include "piece.h"
 #include <iostream> 
@@ -105,5 +102,3 @@ void GraphicsDisplay::notify(Subject &whoFrom) {
 
     window.flush();
 }
-
-#endif
