@@ -42,9 +42,15 @@ public:
     void nextTurn();                               // Switch to the other player
     bool checkGameState();                         // Detect check, checkmate, stalemate;
 
+    // Web/WASM API: try human move, return true if valid
+    bool tryHumanMove(const std::string& from, const std::string& to);
+    // Web/WASM API: execute computer move, return "e2e4" or empty string
+    std::string doComputerMove();
+
     // Utility
     Colour getCurrentTurn() const;
     Board& getBoard();
+    bool getIsGameRunning() const { return isGameRunning; }
     void printFinalScore() const; 
 };
 

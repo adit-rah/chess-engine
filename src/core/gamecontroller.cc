@@ -340,3 +340,44 @@ void GameController::printFinalScore() const {
     std::cout << "Black: " << blackScore << "\n";
 }
 
+bool GameController::tryHumanMove(const std::string& from, const std::string& to) {
+    if (!isGameRunning) return false;
+    Player* currentPlayer = (turn == Colour::White) ? players[0] : players[1];
+    if (!currentPlayer) return false;
+    if (dynamic_cast<HumanPlayer*>(currentPlayer) == nullptr) return false;
+    std::istringstream iss("move " + from + " " + to);
+    std::string action;
+    iss >> action;
+    if (action != "move") return false;
+    if (!currentPlayer->makeMove(*board, iss)) return false;
+    board->notifyObservers();
+    if (checkGameState()) {
+        isGameRunning = false;
+    } else {
+        nextTurn();
+    }
+    return true;
+}
+
+std::string GameController::doComputerMove() {
+    if (!isGameRunning) return "";
+    Player* currentPlayer = (turn == Colour::White) ? players[0] : players[1];
+    if (!currentPlayer) return "";
+    std::istringstream dummy;
+    if (!currentPlayer->makeMove(*board, dummy)) return "";
+    auto from = board->getLastMoveFrom();
+    auto to = board->getLastMoveTo();
+    std::string result;
+    result += char('a' + from.col);
+    result += char('1' + from.row);
+    result += char('a' + to.col);
+    result += char('1' + to.row);
+    board->notifyObservers();
+    if (checkGameState()) {
+        isGameRunning = false;
+    } else {
+        nextTurn();
+    }
+    return result;
+}
+

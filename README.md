@@ -133,11 +133,9 @@ Multiple displays can be attached simultaneously. The graphics display features:
 - `computer3`: improved heuristics  
 - `computer4`: strongest AI  
 
-## Cleaning
+## Web Build (WASM)
 
-```bash
-make clean
-```
+The engine can be compiled to WebAssembly for the browser. See [web/README.md](web/README.md) for build instructions. A minimal web UI is included; deploy the `web` folder to GitHub Pages or any static host.
 
 ## Example
 

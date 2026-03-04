@@ -371,7 +371,7 @@ bool Board::canMove(Piece& p) {
 // Placement Validation methods (see .h for documentation)
 
 void Board::setPieceAt(Position pos, Piece* piece) {
-    // First delete any existing piece at that square
+    if (pos.row < 0 || pos.row >= BOARD_SIZE || pos.col < 0 || pos.col >= BOARD_SIZE) return;
     Piece* existing = pieces[pos.row][pos.col];
     if (existing) delete existing;
 
@@ -386,7 +386,7 @@ void Board::setPieceAt(Position pos, Piece* piece) {
 
 
 void Board::placePiece(char pieceSymbol, Position pos) {
-    // get piece info 
+    if (pos.row < 0 || pos.row >= BOARD_SIZE || pos.col < 0 || pos.col >= BOARD_SIZE) return;
     Colour colour = isupper(pieceSymbol) ? Colour::White : Colour::Black;
     char lower = tolower(pieceSymbol);
 
@@ -406,6 +406,7 @@ void Board::placePiece(char pieceSymbol, Position pos) {
 
 
 void Board::removePiece(Position pos) {
+    if (pos.row < 0 || pos.row >= BOARD_SIZE || pos.col < 0 || pos.col >= BOARD_SIZE) return;
     setPieceAt(pos, new EmptyPiece(pos));
 }
 
