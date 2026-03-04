@@ -1,0 +1,51 @@
+#ifndef GAMECONTROLLER_H
+#define GAMECONTROLLER_H
+
+#include "board.h"
+#include "player.h"
+#include "display.h"
+#include <memory>
+#include <string>
+
+class GameController {
+    Board *board;                       // Owns the chess board
+    Player *players[2];                 // Two players (could be Human or Computer)
+    float whiteScore = 0.0f;            // this is just to track score, only a small change to 
+    float blackScore = 0.0f;            // account for more players (make vector)
+    Colour turn;                        // Whose turn is it? White/Black
+    std::vector<AbstractDisplay*> displays;     // Attached displays (Text/Graphical)
+    
+    bool isGameRunning = false;         // flags
+    bool inSetupMode = false;
+
+    // Command Handling
+    void handleSetupCommand(const std::string &action, std::istringstream &iss);
+    void handleNormalCommand(const std::string &action, std::istringstream &iss);
+    void cmdGame(std::istringstream &iss);
+    void cmdMove(std::istringstream &iss); 
+    void cmdResign();
+    void cmdAutoplay(); 
+
+public:
+    GameController();
+    ~GameController();
+
+    // Core setup
+    void startGame(Player* white, Player* black);  // Initialize board, players
+    void attachDisplay(AbstractDisplay* d);                // Add a display observer
+    void setBoard(Board* newBoard);
+    Player* createPlayerFromString(const std::string& type, Colour c);
+    void resetGame(); 
+
+    // Main game loop helpers
+    void processCommand(const std::string &cmd);
+    void nextTurn();                               // Switch to the other player
+    bool checkGameState();                         // Detect check, checkmate, stalemate;
+
+    // Utility
+    Colour getCurrentTurn() const;
+    Board& getBoard();
+    void printFinalScore() const; 
+};
+
+#endif

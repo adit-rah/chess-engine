@@ -1,21 +1,68 @@
 # Chess
 
-A C++20 chess game with text-based display and graphical mode using X11. <br>
+A C++20 chess game with text-based display and modern graphical mode using SDL2. <br>
 Supports human vs human, human vs AI, and AI vs AI with four difficulty levels.
+
+> **Note:** This project has been migrated from X11 to SDL2 for better cross-platform support and modern graphics capabilities.
+
+## Project Structure
+
+```
+chess-engine/
+├── src/
+│   ├── core/       # Game logic, board, and main entry point
+│   ├── pieces/     # Chess piece implementations
+│   ├── players/    # Human and computer player classes
+│   ├── ai/         # AI difficulty levels (1-4)
+│   ├── display/    # Text, graphics, and log displays
+│   ├── patterns/   # Observer/Subject design patterns
+│   └── utils/      # Utility classes (PRNG, window)
+├── Makefile
+└── README.md
+```
 
 ## Requirements
 
-- C++20 compiler (tested with g++-14)
+- C++20 compiler (tested with g++)
 - Make
-- X11 libraries (for graphics)
+- SDL2 and SDL2_ttf libraries (for graphics)
+
+### Installing SDL2
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install libsdl2-dev libsdl2-ttf-dev
+```
+
+**Fedora/RHEL:**
+```bash
+sudo dnf install SDL2-devel SDL2_ttf-devel
+```
+
+**macOS (Homebrew):**
+```bash
+brew install sdl2 sdl2_ttf
+```
+
+**Windows (MSYS2):**
+```bash
+pacman -S mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_ttf
+```
 
 ## Building
 
-Default build (text-only):
+**Important:** Make sure SDL2 libraries are installed first (see [Installing SDL2](#installing-sdl2) above).
+
+Build the game:
 ```bash
 make
 ```
 This produces: `./chess`
+
+Clean build artifacts:
+```bash
+make clean
+```
 
 ## Running
 
@@ -71,10 +118,13 @@ With both:
 ## Displays
 
 - **TextDisplay**: ASCII chessboard  
-- **GraphicsDisplay**: X11 GUI  
+- **GraphicsDisplay**: Modern SDL2-based GUI with hardware acceleration
 - **LogDisplay**: optional file-based move log  
 
-Multiple displays can be attached simultaneously.
+Multiple displays can be attached simultaneously. The graphics display features:
+- Cross-platform support (Windows, Linux, macOS)
+- Smooth rendering with hardware acceleration
+- Modern, clean interface
 
 ## AI Levels
 
