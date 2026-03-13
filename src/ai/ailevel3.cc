@@ -30,54 +30,40 @@ int AILevel3::getLowestAttackerValue(Board &b, Colour oppColour, Position pos, P
 }
 
 std::vector<Position> AILevel3::determineNextBestMove(Board &b) {
+    Board searchBoard(b);
     std::vector<ScoredPosition> scoredMoves;
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
-    // store all squares currently being attacked by the opponent
-    std::vector<Position> dangerSquares = b.squaresBeingAttackedBy(oppColour);
+
     for (int row = 0; row < b.getBoardSize(); ++row) {
         for (int col = 0; col < b.getBoardSize(); ++col) {
             Position from(row, col);
             int lowestAttackerValue = getLowestAttackerValue(b, oppColour, from);
-
             Piece* piece = b.getPieceAt(from);
             if (piece && piece->getColour() == colour) {
                 std::vector<Position> moves = piece->getValidMoves(b);
                 for (Position to : moves) {
                     int move_points = 0;
-                    if (lowestAttackerValue > 0){
-                        move_points = piece->getValue() - lowestAttackerValue; // tracks how important it is to move piece
+                    if (lowestAttackerValue > 0) {
+                        move_points = piece->getValue() - lowestAttackerValue;
                     }
                     Piece* target = b.getPieceAt(to);
-                    // Add points for capturing
                     if (target && target->getColour() == oppColour) {
                         int lowestOpponentDefender = getLowestAttackerValue(b, oppColour, to);
                         int lowestOurSupport = getLowestAttackerValue(b, colour, to, from);
                         bool targetIsDefended = (lowestOpponentDefender > 0);
                         bool weAreSupported = (lowestOurSupport > 0);
-
                         if (!targetIsDefended || (target->getValue() > piece->getValue())) {
-                            move_points += target->getValue(); // capture
+                            move_points += target->getValue();
                         } else if (targetIsDefended && weAreSupported) {
                             move_points += target->getValue() - piece->getValue();
                         } else {
-                            move_points -= piece->getValue(); // risky trade
+                            move_points -= piece->getValue();
                         }
                     }
-                    
-                    // Make a copy of the board
-                    Board tempBoard(b);
-                    // Apply the move on the copy
-                    tempBoard.movePiece(Position(row, col), to);
-
-                    if (tempBoard.isCheckMate(oppColour)){
-                        move_points = 1000; // gain 1000 points to never miss checkmate
-                    } 
-                    else if (tempBoard.isInCheck(oppColour)) {
-                        move_points += 2;   // 2 points for putting opponent in check
-                    }
-
-                    
-
+                    if (!searchBoard.makeMove(from, to)) continue;
+                    if (searchBoard.isCheckMate(oppColour)) move_points = 1000;
+                    else if (searchBoard.isInCheck(oppColour)) move_points += 2;
+                    searchBoard.unmakeMove();
                     scoredMoves.emplace_back(from, to, move_points);
                 }
             }

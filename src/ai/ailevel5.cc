@@ -109,9 +109,9 @@ int staticEval(Board& b, Colour colour) {
     int pst = 0;
     Colour opp = (colour == Colour::White) ? Colour::Black : Colour::White;
 
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
-            Piece* p = b.getPieceAt(Position(r, c));
+    for (int r = 0; r < b.getBoardSize(); ++r) {
+        for (int c = 0; c < b.getBoardSize(); ++c) {
+            Piece* p = b.getPieceAt(r, c);
             if (!p || p->getType() == PieceType::None) continue;
 
             int val = p->getValue();
@@ -136,11 +136,11 @@ int staticEval(Board& b, Colour colour) {
 
 void collectMoves(Board& b, Colour c, std::vector<ScoredMove>& out) {
     out.clear();
-    out.reserve(48);  // typical max ~35 legal moves
-    for (int r = 0; r < 8; ++r) {
-        for (int col = 0; col < 8; ++col) {
+    out.reserve(48);
+    for (int r = 0; r < b.getBoardSize(); ++r) {
+        for (int col = 0; col < b.getBoardSize(); ++col) {
             Position from(r, col);
-            Piece* piece = b.getPieceAt(from);
+            Piece* piece = b.getPieceAt(r, col);
             if (!piece || piece->getColour() != c) continue;
 
             std::vector<Position> moves = piece->getValidMoves(b);
@@ -164,10 +164,10 @@ void collectMoves(Board& b, Colour c, std::vector<ScoredMove>& out) {
 void collectCaptureMoves(Board& b, Colour c, std::vector<ScoredMove>& out) {
     out.clear();
     out.reserve(16);
-    for (int r = 0; r < 8; ++r) {
-        for (int col = 0; col < 8; ++col) {
+    for (int r = 0; r < b.getBoardSize(); ++r) {
+        for (int col = 0; col < b.getBoardSize(); ++col) {
             Position from(r, col);
-            Piece* piece = b.getPieceAt(from);
+            Piece* piece = b.getPieceAt(r, col);
             if (!piece || piece->getColour() != c) continue;
 
             std::vector<Position> raw = piece->getRawMoves(b);
@@ -184,7 +184,7 @@ void collectCaptureMoves(Board& b, Colour c, std::vector<ScoredMove>& out) {
     });
 }
 
-// Quiescence: capture-only search to avoid horizon effect
+// Quiescence: capture-only search (uses make/unmake, no board copy)
 int quiescence(Board& b, Colour colourToMove, int alpha, int beta, int qDepth) {
     if (qDepth <= 0) return staticEval(b, colourToMove);
 
@@ -197,10 +197,9 @@ int quiescence(Board& b, Colour colourToMove, int alpha, int beta, int qDepth) {
 
     int best = staticEval(b, colourToMove);
     for (const ScoredMove& m : captures) {
-        Board copy(b);
-        if (!copy.movePiece(m.from, m.to)) continue;
-
-        int score = -quiescence(copy, opp, -beta, -alpha, qDepth - 1);
+        if (!b.makeMove(m.from, m.to)) continue;
+        int score = -quiescence(b, opp, -beta, -alpha, qDepth - 1);
+        b.unmakeMove();
         if (score > best) best = score;
         if (score > alpha) alpha = score;
         if (alpha >= beta) break;
@@ -208,7 +207,7 @@ int quiescence(Board& b, Colour colourToMove, int alpha, int beta, int qDepth) {
     return best;
 }
 
-// Entry point that uses quiescence at leaf nodes
+// Entry point that uses quiescence at leaf nodes (uses make/unmake, no board copy)
 int alphabetaWithQuiescence(Board& b, Colour colourToMove, int depth, int alpha, int beta) {
     Colour opp = (colourToMove == Colour::White) ? Colour::Black : Colour::White;
 
@@ -216,9 +215,7 @@ int alphabetaWithQuiescence(Board& b, Colour colourToMove, int depth, int alpha,
     if (b.isCheckMate(opp)) return CHECKMATE_SCORE;
     if (b.isStaleMate(colourToMove)) return 0;
 
-    if (depth == 0) {
-        return quiescence(b, colourToMove, alpha, beta, QUIESCE_DEPTH);
-    }
+    if (depth == 0) return quiescence(b, colourToMove, alpha, beta, QUIESCE_DEPTH);
 
     std::vector<ScoredMove> moves;
     collectMoves(b, colourToMove, moves);
@@ -227,10 +224,9 @@ int alphabetaWithQuiescence(Board& b, Colour colourToMove, int depth, int alpha,
 
     int best = -CHECKMATE_SCORE - 1;
     for (const ScoredMove& m : moves) {
-        Board copy(b);
-        if (!copy.movePiece(m.from, m.to)) continue;
-
-        int score = -alphabetaWithQuiescence(copy, opp, depth - 1, -beta, -alpha);
+        if (!b.makeMove(m.from, m.to)) continue;
+        int score = -alphabetaWithQuiescence(b, opp, depth - 1, -beta, -alpha);
+        b.unmakeMove();
         if (score > best) best = score;
         if (score > alpha) alpha = score;
         if (alpha >= beta) break;
@@ -241,8 +237,9 @@ int alphabetaWithQuiescence(Board& b, Colour colourToMove, int depth, int alpha,
 }  // namespace
 
 std::vector<Position> AILevel5::determineNextBestMove(Board& b) {
+    Board searchBoard(b);  // one copy per AI move
     std::vector<ScoredMove> moves;
-    collectMoves(b, colour, moves);
+    collectMoves(searchBoard, colour, moves);
 
     if (moves.empty()) return {Position(-1, -1), Position(-1, -1)};
 
@@ -251,10 +248,9 @@ std::vector<Position> AILevel5::determineNextBestMove(Board& b) {
     std::vector<std::pair<Position, Position>> bestMoves;
 
     for (const ScoredMove& m : moves) {
-        Board copy(b);
-        if (!copy.movePiece(m.from, m.to)) continue;
-
-        int score = -alphabetaWithQuiescence(copy, opp, SEARCH_DEPTH - 1, -CHECKMATE_SCORE - 1, CHECKMATE_SCORE + 1);
+        if (!searchBoard.makeMove(m.from, m.to)) continue;
+        int score = -alphabetaWithQuiescence(searchBoard, opp, SEARCH_DEPTH - 1, -CHECKMATE_SCORE - 1, CHECKMATE_SCORE + 1);
+        searchBoard.unmakeMove();
 
         if (score > bestScore) {
             bestScore = score;

@@ -7,35 +7,27 @@
 // Assumes ScoredPosition has: Position from, Position to, int score
 
 std::vector<Position> AILevel2::determineNextBestMove(Board &b) {
+    Board searchBoard(b);
     std::vector<ScoredPosition> scoredMoves;
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
 
     for (int row = 0; row < b.getBoardSize(); ++row) {
         for (int col = 0; col < b.getBoardSize(); ++col) {
-            Piece* piece = b.getPieceAt(Position(row, col));
+            Position from(row, col);
+            Piece* piece = b.getPieceAt(from);
             if (piece && piece->getColour() == colour) {
                 std::vector<Position> moves = piece->getValidMoves(b);
                 for (Position to : moves) {
                     int move_points = 0;
                     Piece* target = b.getPieceAt(to);
-                    // Add points for capturing
                     if (target && target->getColour() == oppColour) {
-                        move_points += target->getValue(); // 1 point for capturing an opponent's piece
+                        move_points += target->getValue();
                     }
-                    
-                    // Make a copy of the board
-                    Board tempBoard(b);
-                    // Apply the move on the copy
-                    tempBoard.movePiece(Position(row, col), to);
-
-                    if (tempBoard.isCheckMate(oppColour)){
-                        move_points = 1000; // 1000 points for checkmate
-                    } 
-                    if (tempBoard.isInCheck(oppColour)) {
-                        move_points += 5;   // 5 points for putting opponent in check
-                    } 
-
-                    scoredMoves.emplace_back(Position(row, col), to, move_points);
+                    if (!searchBoard.makeMove(from, to)) continue;
+                    if (searchBoard.isCheckMate(oppColour)) move_points = 1000;
+                    if (searchBoard.isInCheck(oppColour)) move_points += 5;
+                    searchBoard.unmakeMove();
+                    scoredMoves.emplace_back(from, to, move_points);
                 }
             }
         }

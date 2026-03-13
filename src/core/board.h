@@ -3,6 +3,7 @@
 
 #include "subject.h"
 #include "piece.h"
+#include <vector>
 
 class Board : public Subject {
     Piece ***pieces;    // "triple pointer AHH", no it's not that bad.
@@ -42,11 +43,14 @@ public:
     
     // returns the piece at that position
     Piece* getPieceAt(Position p) const;
+    Piece* getPieceAt(int row, int col) const;
     // checks if a move is board-legal: i.e., it doesn’t leave the moving side’s king in check.
     // does NOT verify the piece’s own movement rules—only overall board legality.
     bool isBoardLegalMove(Position from, Position to);
     // moves the piece, returns false if invalid move
-    bool movePiece(Position from, Position to); 
+    bool movePiece(Position from, Position to);
+    // Fast path: move without re-validation (caller guarantees move is legal). For AI/search.
+    bool movePieceTrusted(Position from, Position to);
     // handles the board's special moves (castling, enpassent, promotions in this case)
     bool handleSpecialMoves(Position from, Position to);
     // checks if a piece can move 
@@ -67,6 +71,7 @@ public:
     
     // returns all squares being attacked by the colour c
     std::vector<Position> squaresBeingAttackedBy(Colour c) const;
+    void squaresBeingAttackedBy(Colour c, std::vector<Position>& out) const;
     // is the king in the line of sight of any enemy piece?
     bool isInCheck(Colour c) const;
     // are there any moves left?
@@ -91,6 +96,32 @@ public:
 
     // setter for the promotion ========
     void setPendingPromotion(char p);
+
+    // Make/unmake for search (avoids Board copy). Undo stack; must call unmakeMove to match each makeMove.
+    bool makeMove(Position from, Position to);
+    void unmakeMove();
+    bool hasUndoMoves() const { return !undoStack.empty(); }
+
+private:
+    struct UndoInfo {
+        Piece* movedPiece;
+        Piece* capturedPiece;
+        Position from, to;
+        bool hadMoved;
+        Position savedLastFrom, savedLastTo;
+        PieceType savedLastType;
+        bool wasCastling;
+        Piece* rookMoved;
+        Position rookFrom, rookTo;
+        bool rookHadMoved;
+        bool wasPromotion;
+        Piece* promotedPiece;
+        Colour promotionPawnColour;  // colour of pawn we deleted
+        bool wasEnPassant;
+        int epCaptureRow, epCaptureCol;
+        Colour epCaptureColour;
+    };
+    std::vector<UndoInfo> undoStack;
 };
 
 #endif

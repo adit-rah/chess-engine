@@ -47,14 +47,14 @@ int evalOpponentMax(Board& b, Colour oppColour, int count, int alpha, int beta) 
                 Piece* target = b.getPieceAt(to);
                 if (target && target->getColour() != oppColour && target->getColour() != Colour::None)
                     move_points += target->getValue();
-                Board tempBoard(b);
-                if (!tempBoard.movePiece(from, to)) continue;
-                if (tempBoard.isCheckMate(myColour)) move_points += 1000;
-                else if (tempBoard.isInCheck(myColour)) move_points += 1;
-                int score = move_points - evalOpponentMin(tempBoard, myColour, count - 1, -beta, -alpha);
+                if (!b.makeMove(from, to)) continue;
+                if (b.isCheckMate(myColour)) move_points += 1000;
+                else if (b.isInCheck(myColour)) move_points += 1;
+                int score = move_points - evalOpponentMin(b, myColour, count - 1, -beta, -alpha);
+                b.unmakeMove();
                 if (score > best) best = score;
                 if (score > alpha) alpha = score;
-                if (alpha >= beta) return best;  // prune
+                if (alpha >= beta) return best;
             }
         }
     }
@@ -76,14 +76,14 @@ int evalOpponentMin(Board& b, Colour myColour, int count, int alpha, int beta) {
                 Piece* target = b.getPieceAt(to);
                 if (target && target->getColour() != myColour && target->getColour() != Colour::None)
                     move_points += target->getValue();
-                Board tempBoard(b);
-                if (!tempBoard.movePiece(from, to)) continue;
-                if (tempBoard.isCheckMate(oppColour)) move_points += 1000;
-                else if (tempBoard.isInCheck(oppColour)) move_points += 1;
-                int score = move_points - evalOpponentMax(tempBoard, oppColour, count - 1, -beta, -alpha);
+                if (!b.makeMove(from, to)) continue;
+                if (b.isCheckMate(oppColour)) move_points += 1000;
+                else if (b.isInCheck(oppColour)) move_points += 1;
+                int score = move_points - evalOpponentMax(b, oppColour, count - 1, -beta, -alpha);
+                b.unmakeMove();
                 if (score < best) best = score;
                 if (score < beta) beta = score;
-                if (beta <= alpha) return best;  // prune
+                if (beta <= alpha) return best;
             }
         }
     }
@@ -91,6 +91,7 @@ int evalOpponentMin(Board& b, Colour myColour, int count, int alpha, int beta) {
 }
 
 std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
+    Board searchBoard(b);
     Colour oppColour = (colour == Colour::White) ? Colour::Black : Colour::White;
     std::vector<ScoredPosition> scoredMoves;
 
@@ -104,7 +105,7 @@ std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
                 for (Position to : moves) {
                     int move_points = 0;
                     if (lowestAttackerValue > 0) {
-                        move_points = piece->getValue() - lowestAttackerValue; // tracks how important it is to move piece
+                        move_points = piece->getValue() - lowestAttackerValue;
                     }
                     Piece* target = b.getPieceAt(to);
                     if (target && target->getColour() == oppColour) {
@@ -112,26 +113,20 @@ std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
                         int lowestOurSupport = getLowestAttackerValue(b, colour, to, from);
                         bool targetIsDefended = (lowestOpponentDefender > 0);
                         bool weAreSupported = (lowestOurSupport > 0);
-
                         if (!targetIsDefended || (target->getValue() > piece->getValue())) {
-                            move_points += target->getValue(); // capture
+                            move_points += target->getValue();
                         } else if (targetIsDefended && weAreSupported) {
                             move_points += target->getValue() - piece->getValue();
                         } else {
-                            move_points -= piece->getValue(); // risky trade
+                            move_points -= piece->getValue();
                         }
                     }
-                    // Simulate the move
-                    Board tempBoard(b);
-                    tempBoard.movePiece(from, to);
-                    if (tempBoard.isCheckMate(oppColour)) {
-                        move_points = 1000;
-                    } else if (tempBoard.isInCheck(oppColour)) {
-                        move_points += 2; // 2 points for putting opponent in check
-                    }
-                    int opponentBest = evalOpponentMax(tempBoard, oppColour, 2, -INF, INF);
+                    if (!searchBoard.makeMove(from, to)) continue;
+                    if (searchBoard.isCheckMate(oppColour)) move_points = 1000;
+                    else if (searchBoard.isInCheck(oppColour)) move_points += 2;
+                    int opponentBest = evalOpponentMax(searchBoard, oppColour, 2, -INF, INF);
+                    searchBoard.unmakeMove();
                     move_points -= opponentBest;
-                    
                     scoredMoves.emplace_back(from, to, move_points);
                 }
             }
