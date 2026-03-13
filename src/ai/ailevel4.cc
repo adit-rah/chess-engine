@@ -27,41 +27,67 @@ int AILevel4::getLowestAttackerValue(Board &b, Colour oppColour, Position pos, P
 }
 
 
-// Helper function to evaluate the best score the opponent can achieve after a move
-int evaluateOpponentBestMove(Board &b, Colour oppColour, int count = 2) {
-    if (count == 0) {
-        return 0; // base case, static evaluation
-    }
-    int bestScore = -10000;
+// Alpha-beta minimax: evalOpponentMax = max (for opp), evalOpponentMin = min (for us)
+const int INF = 100000;
+
+int evalOpponentMin(Board& b, Colour myColour, int count, int alpha, int beta);
+
+int evalOpponentMax(Board& b, Colour oppColour, int count, int alpha, int beta) {
+    if (count == 0) return 0;
     Colour myColour = (oppColour == Colour::White) ? Colour::Black : Colour::White;
+    int best = -INF;
     for (int row = 0; row < b.getBoardSize(); ++row) {
         for (int col = 0; col < b.getBoardSize(); ++col) {
             Position from(row, col);
             Piece* piece = b.getPieceAt(from);
-            if (piece && piece->getColour() == oppColour) {
-                std::vector<Position> moves = piece->getValidMoves(b);
-                for (Position to : moves) {
-                    int move_points = 0;
-                    Piece* target = b.getPieceAt(to);
-                    if (target && target->getColour() != oppColour && target->getColour() != Colour::None) {
-                        move_points += target->getValue();
-                    }
-                    Board tempBoard(b);
-                    tempBoard.movePiece(from, to);
-                    if (tempBoard.isCheckMate(myColour)) {
-                        move_points += 1000;
-                    } else if (tempBoard.isInCheck(myColour)) {
-                        move_points += 1;
-                    }
-                    // Recursively evaluate the next move for the other player
-                    int replyScore = -evaluateOpponentBestMove(tempBoard, myColour, count - 1);
-                    int totalScore = move_points + replyScore;
-                    if (totalScore > bestScore) bestScore = totalScore; // update best score
-                }
+            if (!piece || piece->getColour() != oppColour) continue;
+            std::vector<Position> moves = piece->getValidMoves(b);
+            for (Position to : moves) {
+                int move_points = 0;
+                Piece* target = b.getPieceAt(to);
+                if (target && target->getColour() != oppColour && target->getColour() != Colour::None)
+                    move_points += target->getValue();
+                Board tempBoard(b);
+                if (!tempBoard.movePiece(from, to)) continue;
+                if (tempBoard.isCheckMate(myColour)) move_points += 1000;
+                else if (tempBoard.isInCheck(myColour)) move_points += 1;
+                int score = move_points - evalOpponentMin(tempBoard, myColour, count - 1, -beta, -alpha);
+                if (score > best) best = score;
+                if (score > alpha) alpha = score;
+                if (alpha >= beta) return best;  // prune
             }
         }
     }
-    return bestScore;
+    return (best == -INF) ? 0 : best;
+}
+
+int evalOpponentMin(Board& b, Colour myColour, int count, int alpha, int beta) {
+    if (count == 0) return 0;
+    Colour oppColour = (myColour == Colour::White) ? Colour::Black : Colour::White;
+    int best = INF;
+    for (int row = 0; row < b.getBoardSize(); ++row) {
+        for (int col = 0; col < b.getBoardSize(); ++col) {
+            Position from(row, col);
+            Piece* piece = b.getPieceAt(from);
+            if (!piece || piece->getColour() != myColour) continue;
+            std::vector<Position> moves = piece->getValidMoves(b);
+            for (Position to : moves) {
+                int move_points = 0;
+                Piece* target = b.getPieceAt(to);
+                if (target && target->getColour() != myColour && target->getColour() != Colour::None)
+                    move_points += target->getValue();
+                Board tempBoard(b);
+                if (!tempBoard.movePiece(from, to)) continue;
+                if (tempBoard.isCheckMate(oppColour)) move_points += 1000;
+                else if (tempBoard.isInCheck(oppColour)) move_points += 1;
+                int score = move_points - evalOpponentMax(tempBoard, oppColour, count - 1, -beta, -alpha);
+                if (score < best) best = score;
+                if (score < beta) beta = score;
+                if (beta <= alpha) return best;  // prune
+            }
+        }
+    }
+    return (best == INF) ? 0 : best;
 }
 
 std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
@@ -103,9 +129,7 @@ std::vector<Position> AILevel4::determineNextBestMove(Board &b) {
                     } else if (tempBoard.isInCheck(oppColour)) {
                         move_points += 2; // 2 points for putting opponent in check
                     }
-                    // Now, check the opponent's best reply
-                    int opponentBest = evaluateOpponentBestMove(tempBoard, oppColour);
-                    // We want to minimize the opponent's best score
+                    int opponentBest = evalOpponentMax(tempBoard, oppColour, 2, -INF, INF);
                     move_points -= opponentBest;
                     
                     scoredMoves.emplace_back(from, to, move_points);

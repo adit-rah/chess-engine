@@ -3,8 +3,41 @@
 #include "graphicsdisplay.h"
 #include "logdisplay.h"
 
+#include <functional>
 #include <iostream>
 #include <string>
+
+#if defined(__unix__) || defined(__APPLE__)
+#include <unistd.h>
+#include <sys/select.h>
+#endif
+#include <SDL.h>
+
+namespace {
+
+// Reads a line from stdin. When idle() is non-null, calls it periodically while
+// waiting (so e.g. SDL can pump events). idle() returns true to request quit.
+// Returns false on EOF or when idle() requested quit.
+bool readLineWithIdle(std::string& line, std::function<bool()> idle) {
+    if (!idle) {
+        return static_cast<bool>(std::getline(std::cin, line));
+    }
+#if defined(__unix__) || defined(__APPLE__)
+    for (;;) {
+        fd_set fds;
+        FD_ZERO(&fds);
+        FD_SET(STDIN_FILENO, &fds);
+        struct timeval tv = {0, 50000};
+        if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) > 0 &&
+            FD_ISSET(STDIN_FILENO, &fds))
+            break;
+        if (idle()) return false;
+    }
+#endif
+    return static_cast<bool>(std::getline(std::cin, line));
+}
+
+}  // namespace
 
 int main(int argc, char *argv[]) {
     GameController game;
@@ -38,7 +71,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Welcome to Chess!\n";
     std::cout << "Commands:\n";
-    std::cout << "  game white-player black-player   (human or computer[1-4])\n";
+    std::cout << "  game white-player black-player   (human or computer[1-5])\n";
     std::cout << "  move e2 e4                       (or just 'move' for AI)\n";
     std::cout << "  autoplay                         (two computer players are required)\n";
     std::cout << "  resign\n";
@@ -46,11 +79,18 @@ int main(int argc, char *argv[]) {
     std::cout << "  Ctrl+D to quit.\n\n";
 
     std::string cmd;
-    while (true) {
-        std::cout << "> ";
-        if (!std::getline(std::cin, cmd)) break;
-        if (cmd.empty()) continue;
+    auto pumpSdl = enableGraphics ? std::function<bool()>{[] {
+        SDL_PumpEvents();
+        SDL_Event e;
+        while (SDL_PollEvent(&e))
+            if (e.type == SDL_QUIT) return true;
+        return false;
+    }} : std::function<bool()>{};
 
+    while (true) {
+        std::cout << "> " << std::flush;
+        if (!readLineWithIdle(cmd, pumpSdl)) break;
+        if (cmd.empty()) continue;
         if (cmd == "quit" || cmd == "exit") break;
         game.processCommand(cmd);
     }

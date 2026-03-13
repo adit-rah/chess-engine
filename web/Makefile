@@ -25,6 +25,7 @@ SOURCES = \
 	../src/ai/ailevel2.cc \
 	../src/ai/ailevel3.cc \
 	../src/ai/ailevel4.cc \
+	../src/ai/ailevel5.cc \
 	game_api.cc
 
 OUTPUT = chess.js

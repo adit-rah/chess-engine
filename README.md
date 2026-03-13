@@ -93,7 +93,7 @@ With both:
   ```
   game human computer1
   ```  
-  where `computer1`–`computer4` are AI difficulty levels.
+  where `computer1`–`computer5` are AI difficulty levels.
 
 - **Make a move**  
   ```
@@ -131,7 +131,8 @@ Multiple displays can be attached simultaneously. The graphics display features:
 - `computer1`: random moves  
 - `computer2`: simple heuristics  
 - `computer3`: improved heuristics  
-- `computer4`: strongest AI  
+- `computer4`: 2-ply lookahead  
+- `computer5`: strongest AI (4-ply alpha-beta, static eval, piece-square tables, quiescence)  
 
 ## Web Build (WASM)
 

@@ -116,7 +116,7 @@
     el.textContent = (turn === 'white' ? 'White' : 'Black') + ' to move' + suffix;
   }
 
-  var VALID_PLAYERS = ['human', 'computer1', 'computer2', 'computer3', 'computer4'];
+  var VALID_PLAYERS = ['human', 'computer1', 'computer2', 'computer3', 'computer4', 'computer5'];
 
   function startGame() {
     if (!Module) return;

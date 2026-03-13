@@ -9,7 +9,7 @@ static bool isValidSquare(const std::string& sq) {
 }
 
 static bool isValidPlayer(const std::string& s) {
-    return s == "human" || s == "computer1" || s == "computer2" || s == "computer3" || s == "computer4";
+    return s == "human" || s == "computer1" || s == "computer2" || s == "computer3" || s == "computer4" || s == "computer5";
 }
 
 static std::string boardToFen(const Board& board) {

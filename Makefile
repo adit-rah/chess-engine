@@ -39,7 +39,8 @@ SOURCES = \
     $(SRC_AI)/ailevel1.cc \
     $(SRC_AI)/ailevel2.cc \
     $(SRC_AI)/ailevel3.cc \
-    $(SRC_AI)/ailevel4.cc
+    $(SRC_AI)/ailevel4.cc \
+    $(SRC_AI)/ailevel5.cc
 
 # object files
 OBJECTS = $(SOURCES:.cc=.o)
