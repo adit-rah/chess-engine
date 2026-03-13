@@ -216,7 +216,7 @@ bool Board::isBoardLegalMove(Position from, Position to) {
 
     pieces[from.row][from.col] = moving;
     moving->setPosition(from);
-    pieces[to.row][to.col] = captured;
+    pieces[to.row][to.col] = captured ? captured : new EmptyPiece(to);  // guard against nullptr
 
     return !stillInCheck;
 }
@@ -292,11 +292,13 @@ bool Board::makeMove(Position from, Position to) {
                 u.rookTo = rookTo;
                 u.rookHadMoved = rook->getHasMoved();
 
+                if (Piece* atTo = getPieceAt(to)) delete atTo;  // was EmptyPiece
                 pieces[to.row][to.col] = piece;
                 piece->setPosition(to);
                 piece->setHasMoved(true);
-                pieces[from.row][from.col] = new EmptyPiece(from);
+                pieces[from.row][from.col] = new EmptyPiece(from);  // king moved, overwrite with Empty
 
+                if (Piece* atRookTo = getPieceAt(rookTo)) delete atRookTo;  // was EmptyPiece
                 pieces[rookTo.row][rookTo.col] = rook;
                 rook->setPosition(rookTo);
                 rook->setHasMoved(true);
@@ -348,8 +350,9 @@ bool Board::makeMove(Position from, Position to) {
                     u.epCaptureCol = to.col;
                     u.capturedPiece = capPawn;  // preserve for unmake, don't delete
 
-                    pieces[capRow][to.col] = new EmptyPiece(Position(capRow, to.col));
+                    pieces[capRow][to.col] = new EmptyPiece(Position(capRow, to.col));  // overwrite capPawn (preserved in u.capturedPiece)
 
+                    if (Piece* atTo = getPieceAt(to)) delete atTo;  // landing square EmptyPiece - delete to avoid leak
                     pieces[to.row][to.col] = piece;
                     piece->setPosition(to);
                     piece->setHasMoved(true);
