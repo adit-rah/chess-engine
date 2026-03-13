@@ -10,39 +10,100 @@
 </head>
 <body>
   <div id="app">
-    <h1>Chess</h1>
-    <div id="status"></div>
-    <div id="board-wrap">
-      <div id="board"></div>
-    </div>
-    <div id="setup" class="controls-section">
-      <div class="player-row">
-        <label>White</label>
-        <select id="whitePlayer">
-          <option value="human">Human</option>
-          <option value="computer1">Computer 1</option>
-          <option value="computer2">Computer 2</option>
-          <option value="computer3">Computer 3</option>
-          <option value="computer4">Computer 4</option>
-          <option value="computer5">Computer 5 (strongest)</option>
-        </select>
-      </div>
-      <div class="player-row">
-        <label>Black</label>
-        <select id="blackPlayer">
-          <option value="human">Human</option>
-          <option value="computer1">Computer 1</option>
-          <option value="computer2">Computer 2</option>
-          <option value="computer3">Computer 3</option>
-          <option value="computer4">Computer 4</option>
-          <option value="computer5">Computer 5 (strongest)</option>
-        </select>
-      </div>
-      <button id="startGame">Start Game</button>
-    </div>
-    <div id="gameControls" class="controls-section hidden">
-      <button id="newGame">New Game</button>
-    </div>
+    <header class="app-header">
+      <h1>Chess</h1>
+      <p id="status" class="status">Loading...</p>
+    </header>
+
+    <main class="main-content">
+      <section class="board-section">
+        <div id="board-wrap" class="board-wrap">
+          <div id="board" class="board"></div>
+        </div>
+
+        <!-- New game: player select + start or custom -->
+        <section id="setup" class="panel controls-panel">
+          <h2 class="panel-title">New Game</h2>
+          <div class="player-selects">
+            <div class="player-row">
+              <label for="whitePlayer">White</label>
+              <select id="whitePlayer">
+                <option value="human">Human</option>
+                <option value="computer1">Computer 1</option>
+                <option value="computer2">Computer 2</option>
+                <option value="computer3">Computer 3</option>
+                <option value="computer4">Computer 4</option>
+                <option value="computer5">Computer 5 (strongest)</option>
+              </select>
+            </div>
+            <div class="player-row">
+              <label for="blackPlayer">Black</label>
+              <select id="blackPlayer">
+                <option value="human">Human</option>
+                <option value="computer1">Computer 1</option>
+                <option value="computer2">Computer 2</option>
+                <option value="computer3">Computer 3</option>
+                <option value="computer4">Computer 4</option>
+                <option value="computer5">Computer 5 (strongest)</option>
+              </select>
+            </div>
+          </div>
+          <div class="setup-actions">
+            <button id="startGame" class="btn btn-primary">Start Game</button>
+            <button id="customBoard" class="btn btn-ghost">Custom Board</button>
+          </div>
+        </section>
+
+        <!-- Setup mode: edit board before starting -->
+        <section id="setupMode" class="panel controls-panel hidden">
+          <h2 class="panel-title">Edit Board</h2>
+          <div class="piece-palette">
+            <span class="palette-label">Add:</span>
+            <button type="button" class="piece-btn" data-piece="K">♔</button>
+            <button type="button" class="piece-btn" data-piece="Q">♕</button>
+            <button type="button" class="piece-btn" data-piece="R">♖</button>
+            <button type="button" class="piece-btn" data-piece="B">♗</button>
+            <button type="button" class="piece-btn" data-piece="N">♘</button>
+            <button type="button" class="piece-btn" data-piece="P">♙</button>
+            <button type="button" class="piece-btn piece-black" data-piece="k">♚</button>
+            <button type="button" class="piece-btn piece-black" data-piece="q">♛</button>
+            <button type="button" class="piece-btn piece-black" data-piece="r">♜</button>
+            <button type="button" class="piece-btn piece-black" data-piece="b">♝</button>
+            <button type="button" class="piece-btn piece-black" data-piece="n">♞</button>
+            <button type="button" class="piece-btn piece-black" data-piece="p">♟</button>
+            <button id="removeMode" type="button" class="btn btn-ghost btn-small">Remove</button>
+          </div>
+          <div class="turn-setup">
+            <span class="palette-label">Turn:</span>
+            <button type="button" id="setTurnWhite" class="btn btn-ghost btn-small">White</button>
+            <button type="button" id="setTurnBlack" class="btn btn-ghost btn-small">Black</button>
+          </div>
+          <button id="setupDone" class="btn btn-primary">Done</button>
+        </section>
+
+        <!-- In-game controls -->
+        <section id="gameControls" class="panel controls-panel hidden">
+          <div class="game-actions">
+            <button id="resignBtn" class="btn btn-ghost">Resign</button>
+            <button id="nextMove" class="btn btn-ghost hidden">Next Move</button>
+            <label class="autoplay-toggle">
+              <input type="checkbox" id="autoplay">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span class="toggle-label">Autoplay</span>
+            </label>
+          </div>
+          <button id="newGame" class="btn btn-secondary">New Game</button>
+        </section>
+      </section>
+
+      <aside class="timeline-section">
+        <h2 class="panel-title">Move History</h2>
+        <div id="timeline" class="timeline">
+          <div id="timelineEmpty" class="timeline-empty">No moves yet</div>
+          <div id="timelineMoves" class="timeline-moves"></div>
+        </div>
+      </aside>
+    </main>
   </div>
   <script src="chess.js"></script>
   <script src="app.js"></script>

@@ -2,6 +2,7 @@
 #include <emscripten/bind.h>
 #include <string>
 #include <sstream>
+#include <vector>
 static GameController* g_game = nullptr;
 
 static bool isValidSquare(const std::string& sq) {
@@ -69,11 +70,37 @@ bool chess_is_running() {
     return g_game && g_game->getIsGameRunning();
 }
 
+std::string chess_get_move_history() {
+    if (!g_game) return "[]";
+    const auto& hist = g_game->getMoveHistory();
+    std::string out = "[";
+    for (size_t i = 0; i < hist.size(); ++i) {
+        if (i > 0) out += ",";
+        out += "\"" + hist[i] + "\"";
+    }
+    out += "]";
+    return out;
+}
+
 void chess_reset() {
     if (g_game) {
         delete g_game;
         g_game = nullptr;
     }
+}
+
+void chess_process_command(const std::string& cmd) {
+    if (cmd.empty()) return;
+    if (!g_game) g_game = new GameController();
+    g_game->processCommand(cmd);
+}
+
+void chess_resign() {
+    if (g_game) g_game->processCommand("resign");
+}
+
+bool chess_is_setup_mode() {
+    return g_game && g_game->getInSetupMode();
 }
 
 EMSCRIPTEN_BINDINGS(chess) {
@@ -83,6 +110,10 @@ EMSCRIPTEN_BINDINGS(chess) {
     emscripten::function("getBoard", &chess_get_board);
     emscripten::function("getTurn", &chess_get_turn);
     emscripten::function("isRunning", &chess_is_running);
+    emscripten::function("getMoveHistory", &chess_get_move_history);
+    emscripten::function("processCommand", &chess_process_command);
+    emscripten::function("resign", &chess_resign);
+    emscripten::function("isSetupMode", &chess_is_setup_mode);
     emscripten::function("reset", &chess_reset);
 }
 

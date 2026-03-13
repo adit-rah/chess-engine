@@ -14,6 +14,7 @@ class Board : public Subject {
     Position lastMoveTo = Position(-1,-1);;       // than just enpassent, so don't doubt it's existence
     PieceType lastMovePieceType = PieceType::None;
     char pendingPromotionChoice = 'Q';  // next pawn promoted turns into this
+    int halfMoveClock = 0;  // 50-move rule: resets on pawn move or capture, draw when >= 50
 
     // Board specific Moves
     bool handleCastling(Position from, Position to);
@@ -80,6 +81,8 @@ public:
     bool isStaleMate(Colour c);
     // is there not enough material to play the game. 
     bool insufficientMaterial() const;
+    // 50-move rule: draw if 50 consecutive moves without pawn move or capture
+    bool isFiftyMoveDraw() const;
     // finds the kings position on the board
     Position findKing(Colour c) const;
 
@@ -120,6 +123,7 @@ private:
         bool wasEnPassant;
         int epCaptureRow, epCaptureCol;
         Colour epCaptureColour;
+        int savedHalfMoveClock;
     };
     std::vector<UndoInfo> undoStack;
 };

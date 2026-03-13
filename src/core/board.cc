@@ -82,6 +82,7 @@ Board::Board(const Board& other) {
     lastMoveTo = other.lastMoveTo;
     lastMovePieceType = other.lastMovePieceType;
     pendingPromotionChoice = other.pendingPromotionChoice;
+    halfMoveClock = other.halfMoveClock;
 }
 
 
@@ -139,6 +140,7 @@ void Board::setPieces() {       // default chess board
 
 
 void Board::emptyTheBoard() {
+    halfMoveClock = 0;
     for (int r = 0; r < BOARD_SIZE; ++r) {
         for (int c = 0; c < BOARD_SIZE; ++c) {
             // If there's already a piece, delete it first to avoid leaks
@@ -162,6 +164,7 @@ void Board::emptyTheBoard() {
 
 
 void Board::resetBoard() {
+    halfMoveClock = 0;
     setPieces();            // this should just work for now
 }
 
@@ -247,12 +250,16 @@ bool Board::movePieceTrusted(Position from, Position to) {
     if (handleSpecialMoves(from, to)) return true;
 
     Piece* targetPiece = getPieceAt(to);
+    bool wasCapture = targetPiece && targetPiece->getType() != PieceType::None;
+    bool wasPawnMove = (piece->getType() == PieceType::Pawn);
+
     pieces[to.row][to.col] = piece;
     piece->setPosition(to);
     piece->setHasMoved(true);
     pieces[from.row][from.col] = new EmptyPiece(from);
     delete targetPiece;
 
+    halfMoveClock = (wasCapture || wasPawnMove) ? 0 : halfMoveClock + 1;
     return true;
 }
 
@@ -268,6 +275,7 @@ bool Board::makeMove(Position from, Position to) {
     u.savedLastFrom = lastMoveFrom;
     u.savedLastTo = lastMoveTo;
     u.savedLastType = lastMovePieceType;
+    u.savedHalfMoveClock = halfMoveClock;
     u.wasCastling = false;
     u.wasPromotion = false;
     u.wasEnPassant = false;
@@ -304,6 +312,7 @@ bool Board::makeMove(Position from, Position to) {
                 rook->setHasMoved(true);
                 pieces[rookFrom.row][rookFrom.col] = new EmptyPiece(rookFrom);
 
+                halfMoveClock++;
                 undoStack.push_back(u);
                 return true;
             }
@@ -332,7 +341,7 @@ bool Board::makeMove(Position from, Position to) {
             promoted->setHasMoved(true);
             pieces[to.row][to.col] = promoted;
             u.promotedPiece = promoted;
-            // Don't delete piece - we restore it on unmake (u.movedPiece already points to it)
+            halfMoveClock = 0;
 
             undoStack.push_back(u);
             return true;
@@ -358,6 +367,7 @@ bool Board::makeMove(Position from, Position to) {
                     piece->setHasMoved(true);
                     pieces[from.row][from.col] = new EmptyPiece(from);
 
+                    halfMoveClock = 0;
                     undoStack.push_back(u);
                     return true;
                 }
@@ -367,11 +377,15 @@ bool Board::makeMove(Position from, Position to) {
 
     // Normal move (don't delete captured - we restore it on unmake)
     u.capturedPiece = getPieceAt(to);
+    bool wasCapture = u.capturedPiece && u.capturedPiece->getType() != PieceType::None;
+    bool wasPawnMove = (piece->getType() == PieceType::Pawn);
+
     pieces[to.row][to.col] = piece;
     piece->setPosition(to);
     piece->setHasMoved(true);
     pieces[from.row][from.col] = new EmptyPiece(from);
 
+    halfMoveClock = (wasCapture || wasPawnMove) ? 0 : halfMoveClock + 1;
     undoStack.push_back(u);
     return true;
 }
@@ -385,6 +399,7 @@ void Board::unmakeMove() {
     lastMoveFrom = u.savedLastFrom;
     lastMoveTo = u.savedLastTo;
     lastMovePieceType = u.savedLastType;
+    halfMoveClock = u.savedHalfMoveClock;
 
     if (u.wasCastling) {
         delete pieces[u.from.row][u.from.col];
@@ -454,6 +469,7 @@ bool Board::handleSpecialMoves(Position from, Position to) {
 bool Board::handleCastling(Position from, Position to) {
     int colDiff = to.col - from.col;
     if (std::abs(colDiff) != 2) return false; // must move 2 cols
+    halfMoveClock++;  // no pawn move, no capture
 
     int row = from.row;
     bool kingSide = (colDiff > 0);
@@ -512,6 +528,7 @@ bool Board::handlePromotion(Position from, Position to) {
     delete pawn; // remove the old pawn
     pieces[to.row][to.col] = promotedPiece;
 
+    halfMoveClock = 0;  // pawn move
     return true;
 }
 
@@ -541,6 +558,7 @@ bool Board::handleEnPassant(Position from, Position to) {
 
     pieces[from.row][from.col] = new EmptyPiece(from);
 
+    halfMoveClock = 0;  // pawn move + capture
     return true;
 }
 
@@ -731,6 +749,11 @@ bool Board::insufficientMaterial() const {
     }
 
     return true; // no mate possible
+}
+
+
+bool Board::isFiftyMoveDraw() const {
+    return halfMoveClock >= 50;
 }
 
 

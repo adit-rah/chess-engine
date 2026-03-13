@@ -6,6 +6,7 @@
 #include "display.h"
 #include <memory>
 #include <string>
+#include <vector>
 
 class GameController {
     Board *board;                       // Owns the chess board
@@ -17,6 +18,7 @@ class GameController {
     
     bool isGameRunning = false;         // flags
     bool inSetupMode = false;
+    std::vector<std::string> moveHistory;  // for web UI timeline
 
     // Command Handling
     void handleSetupCommand(const std::string &action, std::istringstream &iss);
@@ -51,6 +53,8 @@ public:
     Colour getCurrentTurn() const;
     Board& getBoard();
     bool getIsGameRunning() const { return isGameRunning; }
+    bool getInSetupMode() const { return inSetupMode; }
+    const std::vector<std::string>& getMoveHistory() const { return moveHistory; }
     void printFinalScore() const; 
 };
 

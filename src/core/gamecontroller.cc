@@ -45,6 +45,7 @@ Colour GameController::getCurrentTurn() const {
 }
 
 void GameController::startGame(Player* white, Player* black) {
+    moveHistory.clear();
     players[0] = white;
     players[1] = black;
     turn = Colour::White;
@@ -135,6 +136,14 @@ bool GameController::checkGameState() {
     }
     else if (board->insufficientMaterial()) {
         std::cout << "Draw by insufficient material.\n";
+
+        whiteScore += 0.5f;
+        blackScore += 0.5f;
+
+        return true;
+    }
+    else if (board->isFiftyMoveDraw()) {
+        std::cout << "Draw by 50-move rule.\n";
 
         whiteScore += 0.5f;
         blackScore += 0.5f;
@@ -353,6 +362,16 @@ bool GameController::tryHumanMove(const std::string& from, const std::string& to
     iss >> action;
     if (action != "move") return false;
     if (!currentPlayer->makeMove(*board, iss)) return false;
+    Position fromPos = board->getLastMoveFrom();
+    Position toPos = board->getLastMoveTo();
+    if (fromPos.row >= 0 && fromPos.col >= 0 && toPos.row >= 0 && toPos.col >= 0) {
+        std::string mv;
+        mv += char('a' + fromPos.col);
+        mv += char('1' + fromPos.row);
+        mv += char('a' + toPos.col);
+        mv += char('1' + toPos.row);
+        moveHistory.push_back(mv);
+    }
     board->notifyObservers();
     if (checkGameState()) {
         isGameRunning = false;
@@ -375,6 +394,7 @@ std::string GameController::doComputerMove() {
     result += char('1' + from.row);
     result += char('a' + to.col);
     result += char('1' + to.row);
+    moveHistory.push_back(result);
     board->notifyObservers();
     if (checkGameState()) {
         isGameRunning = false;
